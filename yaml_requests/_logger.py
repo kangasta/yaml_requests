@@ -1,3 +1,5 @@
+import json
+import yaml
 from threading import Event, Thread
 
 # From cli-spinners (https://www.npmjs.com/package/cli-spinners)
@@ -13,6 +15,24 @@ def _print_spinner_and_text(text, stop_event):
         print(f'\r{FRAMES[i % len(FRAMES)]} {text}', end='')
         i += 1
     print('\r', end='')
+
+
+def _response_output(response, output=None):
+    def _format_output(output):
+        output = output.replace('\n', '\n  ')
+        return f'\n  {output}\n'
+
+    try:
+        if not output:
+            return ''
+        elif output.lower() == 'json':
+            pretty_json = json.dumps(response.json(), indent=2)
+            return _format_output(pretty_json)
+        elif output.lower() in ('yml', 'yaml'):
+            pretty_yaml = yaml.dump(response.json())
+            return _format_output(pretty_yaml)
+    except BaseException:
+        return ''
 
 
 def get_color(response, message_type):
@@ -79,7 +99,8 @@ class RequestLogger:
             params,
             response=None,
             message=None,
-            message_type="ERROR"):
+            message_type='ERROR',
+            output=None):
         self._stop_event.set()
         if self._active:
             self._active.join()
@@ -103,6 +124,7 @@ class RequestLogger:
         text = (
             f'{symbol_text} {name_text}'
             f'{self.bold(method)} {params.get("url")}\n  '
-            f'{code_text}{elapsed_text}{message_separator}{message_text}\n')
+            f'{code_text}{elapsed_text}{message_separator}{message_text}\n'
+            f'{_response_output(response, output)}')
 
         print(text)
