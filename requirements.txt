@@ -6,4 +6,5 @@ pylint
 
 # Unittest
 coverage
+flask
 pylint
