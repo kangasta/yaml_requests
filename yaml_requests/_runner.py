@@ -1,5 +1,7 @@
+from jinja2.exceptions import TemplateError
 from requests import request, Session
 from requests.exceptions import RequestException
+
 from .utils.template import Environment
 
 METHODS = ('GET', 'OPTIONS', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE',)
@@ -43,24 +45,34 @@ class PlanRunner:
         num_errors = 0
 
         for request in requests:
-            processed_request = self._env.resolve_templates(request)
-            method, params = _parse_method_and_params(processed_request)
-            self._logger.start(processed_request.get('name'), method, params)
-
             if not self._options.get('ignore_errors') and num_errors > 0:
                 self._logger.finish(
-                    processed_request.get('name'),
-                    method,
-                    params,
+                    request.get('name'),
+                    *_parse_method_and_params(request),
                     message=EARLIER_ERRORS_SKIP,
                     message_type='SKIPPED')
                 continue
 
             try:
+                processed_request = self._env.resolve_templates(request)
+            except TemplateError as error:
+                self._logger.finish(
+                    request.get('name'),
+                    *_parse_method_and_params(request),
+                    message=str(error),
+                    message_type='ERROR')
+
+                num_errors += 1
+                continue
+
+            method, params = _parse_method_and_params(processed_request)
+            self._logger.start(processed_request.get('name'), method, params)
+
+            try:
                 response = self._request(method, **params)
             except RequestException as error:
                 self._logger.finish(
-                    processed_request.get('name'),
+                    request.get('name'),
                     method,
                     params,
                     message=str(error),
@@ -70,6 +82,9 @@ class PlanRunner:
                 continue
 
             self._env.register('response', response)
+            register_name = processed_request.get('register')
+            if register_name:
+                self._env.register(register_name, response)
 
             message_dict = dict()
             if not response.ok:
@@ -85,6 +100,7 @@ class PlanRunner:
                 method,
                 params,
                 response,
+                output=processed_request.get('output'),
                 **message_dict)
 
         return num_errors
