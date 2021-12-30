@@ -1,0 +1,9 @@
+{
+  "requests": [
+    {
+      "get": {
+        "url": "https://google.com"
+      }
+    }
+  ]
+}
