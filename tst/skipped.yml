@@ -1,6 +1,7 @@
-options:
-  raise_for_status: yes
 requests:
+- get:
+    url: https://google.com/not_found
+  raise_for_status: no
 - get:
     url: invalid
 - get:

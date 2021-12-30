@@ -20,6 +20,8 @@ def get_color(response, message_type):
         return 'green'
     if message_type == 'SKIPPED':
         return 'blue'
+    if message_type == 'NOT-RAISED':
+        return 'yellow'
     return 'red'
 
 
@@ -28,6 +30,8 @@ def get_symbol(response, message_type):
         return '✔'
     if message_type == 'SKIPPED':
         return '➜'
+    if message_type == 'NOT-RAISED':
+        return '✔'
     return '✘'
 
 
@@ -78,15 +82,16 @@ class RequestLogger:
             get_symbol(response, message_type), get_color(response, message_type))
         name_text = f'{self.bold(name)}\n  ' if name else ''
         code_text = self.bold(
-            f'HTTP {response.status_code}') if response else ''
-        elapsed_ms = response and response.elapsed.total_seconds() * 1000
-        elapsed_text = f' ({elapsed_ms or 0:.3f} ms)' if response else ''
+            f'HTTP {response.status_code}') if response is not None else ''
+        elapsed_ms = response is not None and response.elapsed.total_seconds() * 1000
+        elapsed_text = f' ({elapsed_ms or 0:.3f} ms)' if response is not None else ''
         message_type_text = self.bold(f'{message_type.upper()}:')
         message_text = f'{message_type_text} {message}' if message else ''
+        message_separator = '\n  ' if message_text and code_text else ''
 
         text = (
             f'{symbol_text} {name_text}'
             f'{self.bold(method)} {params.get("url")}\n  '
-            f'{code_text}{message_text}{elapsed_text}\n')
+            f'{code_text}{elapsed_text}{message_separator}{message_text}\n')
 
         print(text)

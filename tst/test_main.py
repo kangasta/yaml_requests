@@ -78,3 +78,12 @@ class MainTest(TestCase):
                 main()
 
         exit_mock.assert_called_with(1)
+
+    @patch('builtins.exit', side_effect=exit_mock_implementation)
+    @patch('builtins.print')
+    def test_main_ignore_errors(self, print_mock, exit_mock):
+        with self.assertRaises(TestExit):
+            with patch('sys.argv', ['yaml_requests', f'{TST_DIR}/invalid_url.yml']):
+                main()
+
+        exit_mock.assert_called_with(3)

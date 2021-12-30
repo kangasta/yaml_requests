@@ -1,3 +1,9 @@
+options:
+  ignore_errors: yes
 requests:
 - get:
-    url: invalid
+    url: invalid 1
+- get:
+    url: invalid 2
+- get:
+    url: invalid 3
