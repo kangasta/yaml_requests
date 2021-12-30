@@ -1,11 +1,14 @@
-import json
+from multiprocessing import Process
 import os
-import yaml
+from requests import get
+from time import sleep
 
 from unittest import TestCase
 from unittest.mock import patch
 
 from yaml_requests import main, __version__
+
+from server.api import app
 
 NO_PLAN = 251
 INVALID_PLAN = 252
@@ -87,3 +90,32 @@ class MainTest(TestCase):
                 main()
 
         exit_mock.assert_called_with(3)
+
+class IntegrationTest(TestCase):
+    @classmethod
+    def setUpClass(self):
+        self._server = Process(target=app.run)
+        self._server.start()
+
+        ready = False
+        while not ready:
+            try:
+                response = get('http://localhost:5000/queue')
+                response.raise_for_status()
+                ready = True
+            except:
+                sleep(1)
+
+    @classmethod
+    def tearDownClass(self):
+        self._server.terminate()
+        self._server.join()
+
+    @patch('builtins.exit', side_effect=exit_mock_implementation)
+    @patch('builtins.print')
+    def test_main_build_queue(self, print_mock, exit_mock):
+        with self.assertRaises(TestExit):
+            with patch('sys.argv', ['yaml_requests', f'{TST_DIR}/build_queue.yml']):
+                main()
+
+        exit_mock.assert_called_with(0)

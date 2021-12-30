@@ -1,0 +1,21 @@
+name: Simulate execution of a build from queue
+variables:
+  base_url: http://localhost:5000
+  node: default
+requests:
+- name: Get queued items
+  get:
+    url: "{{ base_url }}/queue"
+- name: "Create build for first item in the queue ({{ response.json().0.id }})"
+  post:
+    url: "{{ base_url }}/queue/{{ response.json().0.id }}/init"
+    json:
+      node: "{{ node }}"
+  register: build_create
+- name: "Complete the created build ({{ response.json().build_id }})"
+  post:
+    url: "{{ base_url }}/builds/{{ response.json().build_id }}/complete"
+- name: Output build details
+  get:
+    url: "{{ base_url }}/builds/{{ build_create.json().build_id }}"
+  output: yaml
