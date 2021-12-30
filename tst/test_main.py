@@ -60,8 +60,21 @@ class MainTest(TestCase):
 
             exit_mock.assert_called_with(exit_code)
 
+    @patch('builtins.exit', side_effect=exit_mock_implementation)
     @patch('builtins.print')
-    def test_main_minimal(self, print_mock):
+    def test_main_minimal(self, print_mock, exit_mock):
         for extension in ['yml', 'json']:
-            with patch('sys.argv', ['yaml_requests', f'{TST_DIR}/minimal_plan.{extension}']):
+            with self.assertRaises(TestExit):
+                with patch('sys.argv', ['yaml_requests', f'{TST_DIR}/minimal_plan.{extension}']):
+                    main()
+
+            exit_mock.assert_called_with(0)
+
+    @patch('builtins.exit', side_effect=exit_mock_implementation)
+    @patch('builtins.print')
+    def test_main_skipped(self, print_mock, exit_mock):
+        with self.assertRaises(TestExit):
+            with patch('sys.argv', ['yaml_requests', f'{TST_DIR}/skipped.yml']):
                 main()
+
+        exit_mock.assert_called_with(1)

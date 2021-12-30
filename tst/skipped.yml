@@ -1,0 +1,7 @@
+options:
+  raise_for_status: yes
+requests:
+- get:
+    url: invalid
+- get:
+    url: https://google.com

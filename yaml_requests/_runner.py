@@ -3,7 +3,7 @@ from requests.exceptions import RequestException
 from .utils.template import Environment
 
 METHODS = ('GET', 'OPTIONS', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE',)
-
+RAISE_FOR_STATUS_SKIP = 'Request skipped due to earlier failure.'
 
 def _parse_method_and_params(request):
     method_keys = [key for key in request.keys() if key.upper() in METHODS]
@@ -38,21 +38,26 @@ class PlanRunner:
     def run(self, requests):
         self._logger.title(self._name, len(requests))
 
+        num_errors = 0
+
         for request in requests:
             processed_request = self._env.resolve_templates(request)
             method, params = _parse_method_and_params(processed_request)
             self._logger.start(processed_request.get('name'), method, params)
 
+            if self._options.get('raise_for_status') and num_errors > 0:
+                self._logger.finish(processed_request.get(
+                    'name'), method, params, message=RAISE_FOR_STATUS_SKIP, message_type='SKIPPED')
+                continue
+
             try:
                 response = self._request(method, **params)
             except RequestException as error:
                 self._logger.finish(processed_request.get(
-                    'name'), method, params, error=str(error))
+                    'name'), method, params, message=str(error), message_type='ERROR')
 
-                if self._options.get('raise_for_status'):
-                    break
-                else:
-                    continue
+                num_errors += 1
+                continue
 
             self._env.register('response', response)
 
@@ -62,5 +67,7 @@ class PlanRunner:
                 params,
                 response)
 
-            if self._options.get('raise_for_status') and not response.ok:
-                break
+            if not response.ok:
+                num_errors += 1
+
+        return num_errors
