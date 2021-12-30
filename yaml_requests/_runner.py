@@ -6,6 +6,7 @@ METHODS = ('GET', 'OPTIONS', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE',)
 EARLIER_ERRORS_SKIP = 'Request skipped due to earlier error.'
 NO_RAISE_FOR_STATUS = 'raise_for_status was set to False.'
 
+
 def _parse_method_and_params(request):
     method_keys = [key for key in request.keys() if key.upper() in METHODS]
     if not method_keys or len(method_keys) > 1:
@@ -47,15 +48,23 @@ class PlanRunner:
             self._logger.start(processed_request.get('name'), method, params)
 
             if not self._options.get('ignore_errors') and num_errors > 0:
-                self._logger.finish(processed_request.get(
-                    'name'), method, params, message=EARLIER_ERRORS_SKIP, message_type='SKIPPED')
+                self._logger.finish(
+                    processed_request.get('name'),
+                    method,
+                    params,
+                    message=EARLIER_ERRORS_SKIP,
+                    message_type='SKIPPED')
                 continue
 
             try:
                 response = self._request(method, **params)
             except RequestException as error:
-                self._logger.finish(processed_request.get(
-                    'name'), method, params, message=str(error), message_type='ERROR')
+                self._logger.finish(
+                    processed_request.get('name'),
+                    method,
+                    params,
+                    message=str(error),
+                    message_type='ERROR')
 
                 num_errors += 1
                 continue
@@ -67,7 +76,9 @@ class PlanRunner:
                 if processed_request.get('raise_for_status', True):
                     num_errors += 1
                 else:
-                    message_dict = dict(message_type='NOT-RAISED', message=NO_RAISE_FOR_STATUS)
+                    message_dict = dict(
+                        message_type='NOT-RAISED',
+                        message=NO_RAISE_FOR_STATUS)
 
             self._logger.finish(
                 processed_request.get('name'),
