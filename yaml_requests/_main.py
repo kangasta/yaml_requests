@@ -49,4 +49,5 @@ def main():
         exit(INVALID_PLAN)
 
     runner = PlanRunner(plan.get('name'), options, variables, logger)
-    runner.run(requests)
+    num_errors = runner.run(requests)
+    exit(min(num_errors, 250))

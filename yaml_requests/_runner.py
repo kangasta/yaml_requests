@@ -3,6 +3,8 @@ from requests.exceptions import RequestException
 from .utils.template import Environment
 
 METHODS = ('GET', 'OPTIONS', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE',)
+EARLIER_ERRORS_SKIP = 'Request skipped due to earlier error.'
+NO_RAISE_FOR_STATUS = 'raise_for_status was set to False.'
 
 
 def _parse_method_and_params(request):
@@ -38,29 +40,51 @@ class PlanRunner:
     def run(self, requests):
         self._logger.title(self._name, len(requests))
 
+        num_errors = 0
+
         for request in requests:
             processed_request = self._env.resolve_templates(request)
             method, params = _parse_method_and_params(processed_request)
             self._logger.start(processed_request.get('name'), method, params)
 
+            if not self._options.get('ignore_errors') and num_errors > 0:
+                self._logger.finish(
+                    processed_request.get('name'),
+                    method,
+                    params,
+                    message=EARLIER_ERRORS_SKIP,
+                    message_type='SKIPPED')
+                continue
+
             try:
                 response = self._request(method, **params)
             except RequestException as error:
-                self._logger.finish(processed_request.get(
-                    'name'), method, params, error=str(error))
+                self._logger.finish(
+                    processed_request.get('name'),
+                    method,
+                    params,
+                    message=str(error),
+                    message_type='ERROR')
 
-                if self._options.get('raise_for_status'):
-                    break
-                else:
-                    continue
+                num_errors += 1
+                continue
 
             self._env.register('response', response)
+
+            message_dict = dict()
+            if not response.ok:
+                if processed_request.get('raise_for_status', True):
+                    num_errors += 1
+                else:
+                    message_dict = dict(
+                        message_type='NOT-RAISED',
+                        message=NO_RAISE_FOR_STATUS)
 
             self._logger.finish(
                 processed_request.get('name'),
                 method,
                 params,
-                response)
+                response,
+                **message_dict)
 
-            if self._options.get('raise_for_status') and not response.ok:
-                break
+        return num_errors

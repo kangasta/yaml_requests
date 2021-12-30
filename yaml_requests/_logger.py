@@ -15,14 +15,22 @@ def _print_spinner_and_text(text, stop_event):
     print('\r', end='')
 
 
-def get_color(response):
+def get_color(response, message_type):
     if response and response.ok:
         return 'green'
+    if message_type == 'SKIPPED':
+        return 'blue'
+    if message_type == 'NOT-RAISED':
+        return 'yellow'
     return 'red'
 
 
-def get_symbol(response):
+def get_symbol(response, message_type):
     if response and response.ok:
+        return '✔'
+    if message_type == 'SKIPPED':
+        return '➜'
+    if message_type == 'NOT-RAISED':
         return '✔'
     return '✘'
 
@@ -64,24 +72,37 @@ class RequestLogger:
             self._stop_event.clear()
             self._active.start()
 
-    def finish(self, name, method, params, response=None, error=None):
+    def finish(
+            self,
+            name,
+            method,
+            params,
+            response=None,
+            message=None,
+            message_type="ERROR"):
         self._stop_event.set()
         if self._active:
             self._active.join()
             self._active = None
 
+        has_response = response is not None
+
         symbol_text = self.color(
-            get_symbol(response), get_color(response))
+            get_symbol(
+                response, message_type), get_color(
+                response, message_type))
         name_text = f'{self.bold(name)}\n  ' if name else ''
         code_text = self.bold(
-            f'HTTP {response.status_code}') if response else ''
-        elapsed_ms = response.elapsed.total_seconds() * 1000
-        elapsed_text = f' ({elapsed_ms:.3f} ms)' if response else ''
-        error_text = f'{self.bold("ERROR:")} {error}' if error else ''
+            f'HTTP {response.status_code}') if has_response else ''
+        elapsed_ms = has_response and response.elapsed.total_seconds() * 1000
+        elapsed_text = f' ({elapsed_ms or 0:.3f} ms)' if has_response else ''
+        message_type_text = self.bold(f'{message_type.upper()}:')
+        message_text = f'{message_type_text} {message}' if message else ''
+        message_separator = '\n  ' if message_text and code_text else ''
 
         text = (
             f'{symbol_text} {name_text}'
             f'{self.bold(method)} {params.get("url")}\n  '
-            f'{code_text}{error_text}{elapsed_text}\n')
+            f'{code_text}{elapsed_text}{message_separator}{message_text}\n')
 
         print(text)
