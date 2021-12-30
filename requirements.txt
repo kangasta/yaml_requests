@@ -1,0 +1,9 @@
+.
+
+# Static analysis
+pycodestyle
+pylint
+
+# Unittest
+coverage
+pylint

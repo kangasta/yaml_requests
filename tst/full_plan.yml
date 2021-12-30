@@ -1,0 +1,12 @@
+name: Plan with options and variables for testing
+options:
+  session: yes
+variables:
+  hostname: google.com
+requests:
+- name: "Load {{ hostname }}"
+  get:
+    url: "https://{{ hostname }}"
+- name: "Load wikipedia.org"
+  get:
+    url: "https://wikipedia.org"

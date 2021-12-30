@@ -1,0 +1,22 @@
+name: Release
+on:
+  push:
+    tags:
+    - 'v*'
+
+jobs:
+  release-pypi:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: "3.7"
+    - name: Install dependencies
+      run: pip install build
+    - name: Build Python packages
+      run: python -m build --sdist --wheel --outdir dist/
+    - name: Publish package
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        password: ${{ secrets.PYPI_API_TOKEN }}

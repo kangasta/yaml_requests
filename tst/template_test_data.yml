@@ -1,0 +1,66 @@
+vars:
+  half: 0.5
+  one: 1
+  two: 2
+  asd: asd
+  true_b: True
+  false_b: False
+  yes_s: 'yes'
+  no_s: 'no'
+  list:
+  - 1
+  - 2
+  - 3
+  dict:
+    a: 1
+    b: 2
+tests:
+- in: "one {{ one }} two {{ two }}"
+  out: one 1 two 2
+- in:
+  - "{{ half }}"
+  - "{{ one }}"
+  - "{{ two }}"
+  - three
+  out:
+  - 0.5
+  - 1
+  - 2
+  - three
+- in:
+    dict:
+      a: "{{ asd }}"
+      b: "{{ yes_s }}"
+      c: "{{ true_b }}"
+    list:
+    - "{{ false_b }}"
+    - "{{ no_s }}"
+    - True
+    - 1.5
+    - 2
+    - null
+  out:
+    dict:
+      a: asd
+      b: "yes"
+      c: yes
+    list:
+    - no
+    - "no"
+    - True
+    - 1.5
+    - 2
+    - null
+- in:
+    complex:
+      a: "{{ list }}"
+      b: "{{ dict }}"
+  out:
+    complex:
+      a:
+      - 1
+      - 2
+      - 3
+      b:
+        a: 1
+        b: 2

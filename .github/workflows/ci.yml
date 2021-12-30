@@ -1,0 +1,44 @@
+name: CI
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+
+jobs:
+  unittest:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+        - macos-latest
+        - windows-latest
+        - ubuntu-latest
+        python-version:
+        - "3.7"
+        - "3.8"
+        - "3.9"
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+    - name: Run static analysis and unittests
+      run: |
+        pycodestyle yaml_requests
+        pylint -E --enable=invalid-name,unused-import,useless-object-inheritance yaml_requests
+        coverage run --branch --source yaml_requests/ -m unittest discover -s tst/
+        coverage report -m
+    # - name: Push coverage
+    #   uses: paambaati/codeclimate-action@v2.7.5
+    #   with:
+    #     coverageCommand: coverage xml
+    #     coverageLocations: |
+    #       ${{github.workspace}}/coverage.xml:coverage.py
+    #   env:
+    #     CC_TEST_REPORTER_ID: ${{ secrets.CODECLIMATE_TOKEN }}
+    #   if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.7'

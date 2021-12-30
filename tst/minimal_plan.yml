@@ -1,0 +1,4 @@
+# Minimal plan for testing
+requests:
+- get:
+    url: https://google.com
