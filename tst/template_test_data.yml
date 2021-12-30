@@ -15,6 +15,8 @@ vars:
     a: 1
     b: 2
 tests:
+- in: "{{ yes_s }}/asd/{{ no_s }}"
+  out: yes/asd/no
 - in: "one {{ one }} two {{ two }}"
   out: one 1 two 2
 - in:

@@ -33,7 +33,8 @@ class Environment(_J2_Environment):
     def _is_template(self, str_in):
         start_eq = str_in.startswith(self.variable_start_string)
         end_eq = str_in.endswith(self.variable_end_string)
-        return start_eq and end_eq
+        single_start_eq = str_in.count(self.variable_start_string) == 1
+        return start_eq and single_start_eq and end_eq
 
     def _resolve_string(self, str_in):
         if not self._contains_template(str_in):
