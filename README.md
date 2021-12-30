@@ -1,5 +1,8 @@
 # yaml_requests
 
+[![CI](https://github.com/kangasta/yaml_requests/actions/workflows/ci.yml/badge.svg)](https://github.com/kangasta/yaml_requests/actions/workflows/ci.yml)
+[![Release](https://github.com/kangasta/yaml_requests/actions/workflows/release.yml/badge.svg)](https://github.com/kangasta/yaml_requests/actions/workflows/release.yml)
+
 A simple python app for sending a set of http requests defined as yaml.
 
 ## Installing
