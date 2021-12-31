@@ -1,5 +1,6 @@
-from multiprocessing import Process
+from multiprocessing import Process, set_start_method
 import os
+import platform
 from requests import get
 from time import sleep
 
@@ -9,6 +10,10 @@ from unittest.mock import patch
 from yaml_requests import main, __version__
 
 from server.api import app
+
+# Use fork to start target API. TODO: check for alternative fix
+if platform.system() != 'Linux':
+    set_start_method('fork')
 
 NO_PLAN = 251
 INVALID_PLAN = 252
