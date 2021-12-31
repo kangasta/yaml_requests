@@ -17,7 +17,7 @@ setuptools.setup(
     name="yaml_requests",
     version=version,
     author="Toni Kangas",
-    description="A simple python app for sending a set of http requests defined as yaml.",
+    description="A simple python app for sending a set of consecutive HTTP requests defined in YAML requests plan.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/kangasta/yaml_requests",
