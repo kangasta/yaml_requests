@@ -32,18 +32,10 @@ class PlanRunner:
             request = Request(request_dict, self._env, skip)
 
             if request.state is None:
-                self._logger.start(
-                    request.name, request.method, request.params)
-
+                self._logger.start_request(request)
                 request.send(self._request)
 
-            self._logger.finish(
-                request.name,
-                request.method,
-                request.params,
-                request.response,
-                output=request.options.output,
-                **request.message_dict)
+            self._logger.finish_request(request)
 
             if not request.state.ok:
                 num_errors += 1

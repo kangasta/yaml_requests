@@ -5,7 +5,6 @@ from requests.exceptions import RequestException
 
 METHODS = ('GET', 'OPTIONS', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE',)
 EARLIER_ERRORS_SKIP = 'Request skipped due to earlier error.'
-NO_RAISE_FOR_STATUS = 'raise_for_status was set to False.'
 NO_HTTP_METHOD = (
     'Request definition should contain exactly one HTTP method as '
     'a main level dict key.')
@@ -71,16 +70,6 @@ class Request:
         self.options = RequestOptions(self._request)
 
     @property
-    def message_dict(self):
-        if not self.state or self.state == RequestState.SUCCESS:
-            return {}
-        else:
-            return dict(
-                message_type=str(
-                    self.state),
-                message=self.state.message)
-
-    @property
     def _request(self):
         return self._processed or self._raw
 
@@ -124,6 +113,6 @@ class Request:
             if self.options.raise_for_status:
                 self._set_state(RequestState.FAILURE)
             else:
-                self._set_state(RequestState.NOT_RAISED, NO_RAISE_FOR_STATUS)
+                self._set_state(RequestState.NOT_RAISED)
         else:
             self._set_state(RequestState.SUCCESS)

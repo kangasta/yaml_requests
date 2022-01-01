@@ -1,11 +1,18 @@
 from datetime import datetime
 from flask import Flask, jsonify, request
+from os import getenv
+from random import uniform
+from time import sleep
 from uuid import uuid4
 
 app = Flask(__name__)
 
 queue = {str(uuid4()): dict(build_id=None, steps=[]) for _ in range(10)}
 builds = {}
+
+def simulate_delay():
+    if getenv('SIMULATE_DELAY'):
+        sleep(uniform(1,5))
 
 def _error(msg, status=400):
     return jsonify(dict(error=msg)), status
@@ -15,12 +22,14 @@ def _timestamp():
 
 @app.route('/queue', methods=['GET'])
 def queue_route():
+    simulate_delay()
     queue_list = [{'id': key, **value} for key, value in queue.items() if not value.get('build_id')]
 
     return jsonify(queue_list)
 
 @app.route('/queue/<queue_id>/init', methods=['POST'])
 def queue_item_init_route(queue_id):
+    simulate_delay()
     if queue_id not in queue:
         return _error(f'Queue item {queue_id} not in queue.', 404)
 
@@ -36,6 +45,7 @@ def queue_item_init_route(queue_id):
 
 @app.route('/builds/<build_id>', methods=['GET'])
 def builds_item_route(build_id):
+    simulate_delay()
     if build_id not in builds:
         return _error(f'Build {build_id} not found.', 404)
 
@@ -43,6 +53,7 @@ def builds_item_route(build_id):
 
 @app.route('/builds/<build_id>/complete', methods=['POST'])
 def builds_item_complete_route(build_id):
+    simulate_delay()
     if build_id not in builds:
         return _error(f'Build {build_id} not found.', 404)
 

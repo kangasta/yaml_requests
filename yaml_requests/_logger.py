@@ -1,26 +1,53 @@
 import json
 import yaml
+import re
+from shutil import get_terminal_size
 from threading import Event, Thread
+
+from ._request import RequestState
 
 # From cli-spinners (https://www.npmjs.com/package/cli-spinners)
 INTERVAL = 0.080  # seconds
 FRAMES = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
 
-COLORS = dict(red=31, green=32, yellow=33, blue=34)
+COLORS = dict(red=31, green=32, yellow=33, blue=34, grey=90)
+
+
+def _fit_to_width(text):
+    max_len = get_terminal_size().columns
+    non_formatted_text = re.sub(r'\033\[[0-9]+m', '', text.replace('\r', ''))
+    if len(non_formatted_text) < max_len:
+        return text
+
+    i = 0
+    j = 0
+    while i < max_len - 2:
+        match = re.match(r'\r|\033\[[0-9]+m', text[(i + j):])
+        if match:
+            j += len(match.group(0))
+        else:
+            i += 1
+
+    return f'{text[:(i + j)]}\033[0m…'
 
 
 def _print_spinner_and_text(text, stop_event):
     i = 0
     while not stop_event.wait(INTERVAL):
-        print(f'\r{FRAMES[i % len(FRAMES)]} {text}', end='')
+        print(_fit_to_width(f'\r{FRAMES[i % len(FRAMES)]} {text}'), end='')
         i += 1
     print('\r', end='')
 
 
-def _response_output(response, output=None):
+def _response_output(request):
     def _format_output(output):
+        if not output.endswith('\n'):
+            output = f'{output}\n'
         output = output.replace('\n', '\n  ')
-        return f'\n  {output}\n'
+        return f'\n  {output}'
+
+    output = request.options.output
+    response = request.response
 
     try:
         if not output:
@@ -35,24 +62,13 @@ def _response_output(response, output=None):
         return ''
 
 
-def get_color(response, message_type):
-    if response and response.ok:
-        return 'green'
-    if message_type == 'SKIPPED':
-        return 'blue'
-    if message_type == 'NOT-RAISED':
-        return 'yellow'
-    return 'red'
-
-
-def get_symbol(response, message_type):
-    if response and response.ok:
-        return '✔'
-    if message_type == 'SKIPPED':
-        return '➜'
-    if message_type == 'NOT-RAISED':
-        return '✔'
-    return '✘'
+def get_indicator(request_state):
+    if request_state in (RequestState.SUCCESS, RequestState.NOT_RAISED,):
+        return ('green', '✔',)
+    elif request_state in (RequestState.FAILURE, RequestState.ERROR,):
+        return ('red', '✘',)
+    elif request_state == RequestState.SKIPPED:
+        return ('blue', '⮟',)
 
 
 class RequestLogger:
@@ -81,50 +97,66 @@ class RequestLogger:
         name_text = f'{self.bold(name)}\n' if name else ''
         print(f'{name_text}Sending {num_requests} requests:\n')
 
-    def start(self, name, method, params):
-        text = self.bold(
-            name) if name else f'{self.bold(method)} {params.get("url")}'
+    def _get_indicator_text(self, request):
+        color, symbol = get_indicator(request.state)
+        return self.color(symbol, color)
 
-        if self._animations:
-            self._active = Thread(
-                target=_print_spinner_and_text, args=[
-                    text, self._stop_event])
-            self._stop_event.clear()
-            self._active.start()
+    def _get_name_text(self, request):
+        if request.name:
+            return self.bold(request.name)
+        return ''
 
-    def finish(
-            self,
-            name,
-            method,
-            params,
-            response=None,
-            message=None,
-            message_type='ERROR',
-            output=None):
+    def _get_method_text(self, request):
+        return f'{self.bold(request.method)} {request.params.get("url")}'
+
+    def _get_response_code_text(self, request):
+        response = request.response
+        if response is None:
+            return ''
+
+        code_text = self.bold(f'HTTP {response.status_code}')
+        elapsed_ms = response.elapsed.total_seconds() * 1000
+        not_raised_text = ''
+        if request.state == RequestState.NOT_RAISED:
+            not_raised_text = self.color(
+                ' HTTP status code ignored.', 'grey')
+
+        return f'{code_text} ({elapsed_ms:.3f} ms){not_raised_text}'
+
+    def _get_message_text(self, request):
+        message = request.state.message
+
+        type_text = self.bold(f'{str(request.state).upper()}:')
+        return f'{type_text} {message}' if message else ''
+
+    def start_request(self, request):
+        if not self._animations:
+            return
+
+        text = self._get_name_text(request) or self._get_method_text(request)
+
+        self._active = Thread(
+            target=_print_spinner_and_text, args=[
+                text, self._stop_event])
+        self._stop_event.clear()
+        self._active.start()
+
+    def finish_request(self, request):
         self._stop_event.set()
         if self._active:
             self._active.join()
             self._active = None
 
-        has_response = response is not None
-
-        symbol_text = self.color(
-            get_symbol(
-                response, message_type), get_color(
-                response, message_type))
-        name_text = f'{self.bold(name)}\n  ' if name else ''
-        code_text = self.bold(
-            f'HTTP {response.status_code}') if has_response else ''
-        elapsed_ms = has_response and response.elapsed.total_seconds() * 1000
-        elapsed_text = f' ({elapsed_ms or 0:.3f} ms)' if has_response else ''
-        message_type_text = self.bold(f'{message_type.upper()}:')
-        message_text = f'{message_type_text} {message}' if message else ''
+        name_text = self._get_name_text(request)
+        name_separator = name_text and '\n  '
+        code_text = self._get_response_code_text(request)
+        message_text = self._get_message_text(request)
         message_separator = '\n  ' if message_text and code_text else ''
 
         text = (
-            f'{symbol_text} {name_text}'
-            f'{self.bold(method)} {params.get("url")}\n  '
-            f'{code_text}{elapsed_text}{message_separator}{message_text}\n'
-            f'{_response_output(response, output)}')
+            f'{self._get_indicator_text(request)} {name_text}{name_separator}'
+            f'{self._get_method_text(request)}\n  '
+            f'{code_text}{message_separator}{message_text}\n'
+            f'{_response_output(request)}')
 
         print(text)
