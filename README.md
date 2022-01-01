@@ -31,6 +31,7 @@ In addition to this basic behavior, more advanced features are provided as well:
 - Variables can be defined in YAML request plan and overridden from commandline arguments.
 - Response of the most recent request is stored in `response` variable.
 - Responses can be stored as variables with `register` keyword.
+- Response can be verified with assertions.
 
 More advanded example that can be run against dummy API provided by [tst/server/api.py](./tst/server/api.py):
 
@@ -43,15 +44,29 @@ requests:
 - name: Get queued items
   get:
     url: "{{ base_url }}/queue"
+  assert:
+  - name: Queue is not empty
+    expression: response.json() | length
+  - name: Status code is 200
+    expression: response.status_code == 200
+  - name: Request took less than 5 seconds
+    expression: response.elapsed.total_seconds() < 5
+  register: queue_response_1
 - name: "Create build for first item in the queue ({{ response.json().0.id }})"
   post:
     url: "{{ base_url }}/queue/{{ response.json().0.id }}/init"
     json:
       node: "{{ node }}"
   register: build_create
-- name: "Complete the created build ({{ response.json().build_id }})"
+- name: Get queued items
+  get:
+    url: "{{ base_url }}/queue"
+  assert:
+  - name: Queue is shorter than initially
+    expression: response.json() | length < queue_response_1.json() | length
+- name: "Complete the created build ({{ build_create.json().build_id }})"
   post:
-    url: "{{ base_url }}/builds/{{ response.json().build_id }}/complete"
+    url: "{{ base_url }}/builds/{{ build_create.json().build_id }}/complete"
 - name: Output build details
   get:
     url: "{{ base_url }}/builds/{{ build_create.json().build_id }}"

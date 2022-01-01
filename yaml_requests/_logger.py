@@ -62,12 +62,12 @@ def _response_output(request):
         return ''
 
 
-def get_indicator(request_state):
-    if request_state in (RequestState.SUCCESS, RequestState.NOT_RAISED,):
+def get_indicator(state_or_ok):
+    if state_or_ok in (RequestState.SUCCESS, RequestState.NOT_RAISED, True,):
         return ('green', '✔',)
-    elif request_state in (RequestState.FAILURE, RequestState.ERROR,):
+    elif state_or_ok in (RequestState.FAILURE, RequestState.ERROR, False,):
         return ('red', '✘',)
-    elif request_state == RequestState.SKIPPED:
+    elif state_or_ok == RequestState.SKIPPED:
         return ('blue', '⮟',)
 
 
@@ -97,8 +97,9 @@ class RequestLogger:
         name_text = f'{self.bold(name)}\n' if name else ''
         print(f'{name_text}Sending {num_requests} requests:\n')
 
-    def _get_indicator_text(self, request):
-        color, symbol = get_indicator(request.state)
+    def _get_indicator_text(self, request=None, assertion=None):
+        color, symbol = get_indicator(
+            request.state if request else assertion.ok)
         return self.color(symbol, color)
 
     def _get_name_text(self, request):
@@ -129,6 +130,18 @@ class RequestLogger:
         type_text = self.bold(f'{str(request.state).upper()}:')
         return f'{type_text} {message}' if message else ''
 
+    def _get_assertion_text(self, request):
+        text = ''
+
+        if request.state == RequestState.SKIPPED:
+            return text
+
+        for assertion in request.assertions:
+            indicator = self._get_indicator_text(assertion=assertion)
+            text += f'\n  {indicator} {assertion.name}'
+
+        return f'{text}\n' if text else ''
+
     def start_request(self, request):
         if not self._animations:
             return
@@ -157,6 +170,7 @@ class RequestLogger:
             f'{self._get_indicator_text(request)} {name_text}{name_separator}'
             f'{self._get_method_text(request)}\n  '
             f'{code_text}{message_separator}{message_text}\n'
+            f'{self._get_assertion_text(request)}'
             f'{_response_output(request)}')
 
         print(text)
