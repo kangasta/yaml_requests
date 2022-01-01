@@ -51,6 +51,32 @@ class RequestOptions:
         self.output = request_dict.get('output')
 
 
+class Assertion:
+    def __init__(self, raw_assertion):
+        self._ok = None
+        if isinstance(raw_assertion, dict):
+            self.name = raw_assertion.get('name')
+            self.expression = raw_assertion.get('expression')
+        else:
+            self.name = raw_assertion
+            self.expression = raw_assertion
+
+    @property
+    def ok(self):
+        if self._ok is None:
+            raise RuntimeError('Assertion has not been executed yet.')
+        return self._ok
+
+    def execute(self, template_env):
+        try:
+            self._ok = bool(template_env.resolve_expression(self.expression))
+        except BaseException:
+            self._ok = False
+            raise
+
+        return self._ok
+
+
 class Request:
     def __init__(self, request_dict, template_env, skip=False):
         self._raw = deepcopy(request_dict)
@@ -59,6 +85,8 @@ class Request:
 
         self.state = None
         self.response = None
+
+        self._parse_assertions()
 
         if skip:
             self._set_state(RequestState.SKIPPED, EARLIER_ERRORS_SKIP)
@@ -95,6 +123,14 @@ class Request:
         self.method = method_keys[0].upper()
         self.params = self._request.pop(method_keys[0])
 
+    def _parse_assertions(self):
+        raw_assertions = self._request.pop('assert', [])
+        if not isinstance(raw_assertions, list):
+            raw_assertions = [raw_assertions]
+
+        self.assertions = [
+            Assertion(raw_assertion) for raw_assertion in raw_assertions]
+
     def send(self, request_function):
         if self.state is not None:
             return
@@ -116,3 +152,11 @@ class Request:
                 self._set_state(RequestState.NOT_RAISED)
         else:
             self._set_state(RequestState.SUCCESS)
+
+        for assertion in self.assertions:
+            try:
+                ok = assertion.execute(self._template_env)
+                if not ok:
+                    self._set_state(RequestState.FAILURE)
+            except BaseException as error:
+                self._set_state(RequestState.ERROR, message=str(error))

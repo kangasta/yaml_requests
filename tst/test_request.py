@@ -1,12 +1,28 @@
 from unittest import TestCase
 
+from jinja2.exceptions import TemplateError
+
 from yaml_requests.utils.template import Environment
-from yaml_requests._request import Request, RequestState
+from yaml_requests._request import Assertion, Request, RequestState
 
 class RequestStateTest(TestCase):
     def test_init_with_unknown_state_raises(self):
         with self.assertRaises(ValueError):
             RequestState('UNKNOWN')
+
+class AssertionTest(TestCase):
+    def test_ok_raises_if_not_executed(self):
+        assertion = Assertion('var is undefined')
+        self.assertEqual(assertion.name, 'var is undefined')
+        with self.assertRaises(RuntimeError):
+            assertion.ok
+
+    def test_execute_raises_on_error(self):
+        env = Environment()
+        assertion = Assertion('var == 3')
+        with self.assertRaises(TemplateError):
+            assertion.execute(env)
+        self.assertFalse(assertion.ok)
 
 REQUEST_WITH_VARIABLE = dict(
     name='Get {{ url }}',
@@ -16,6 +32,11 @@ REQUEST_WITH_VARIABLE = dict(
 REQUEST_WITOUT_METHOD = dict(
     name='HTTP method missing'
 )
+
+REQUEST_WITH_ASSERT = {
+    'get': dict(url='http://localhost:5000'),
+    'assert': 'var == 3'
+}
 
 class MockResponse:
     def __init__(self, ok):
@@ -76,3 +97,21 @@ class RequestTest(TestCase):
                 req.state,
                 expected,
                 msg=f'{raise_for_status}, {response_ok} => {str(req.state)}')
+
+    def test_assertions_from_str(self):
+        env = Environment()
+
+        req = Request(REQUEST_WITH_ASSERT, env)
+        self.assertIsInstance(req.assertions, list)
+        self.assertEqual(len(req.assertions), 1)
+
+        req.send(MockResponse(True))
+        self.assertEqual(req.state, RequestState.ERROR)
+
+    def test_failed_assertion_set_failure_state(self):
+        env = Environment()
+        env.register('var', 5)
+
+        req = Request(REQUEST_WITH_ASSERT, env)
+        req.send(MockResponse(True))
+        self.assertEqual(req.state, RequestState.FAILURE)
