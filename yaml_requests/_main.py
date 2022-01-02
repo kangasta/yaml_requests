@@ -1,7 +1,9 @@
+from os import system
+import platform
+
 from jinja2 import __version__ as _jinja2_version
 from yaml import __version__ as _pyyaml_version
 from requests import __version__ as _requests_version
-
 
 from .utils.args import (
     get_argparser, load_plan_file, parse_plan, parse_variables)
@@ -25,6 +27,10 @@ INTERRUPTED = 253
 
 
 def main():
+    # On windows, run shell command to enable ANSI code support
+    if platform.system() == 'Windows':
+        system('')
+
     args = get_argparser().parse_args()
     logger = RequestLogger(animations=args.animation, colors=args.colors)
 
