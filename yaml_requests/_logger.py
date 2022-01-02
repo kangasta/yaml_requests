@@ -154,11 +154,14 @@ class RequestLogger:
         self._stop_event.clear()
         self._active.start()
 
-    def finish_request(self, request):
+    def stop_progress_animation(self):
         self._stop_event.set()
         if self._active:
             self._active.join()
             self._active = None
+
+    def finish_request(self, request):
+        self.stop_progress_animation()
 
         name_text = self._get_name_text(request)
         name_separator = name_text and '\n  '

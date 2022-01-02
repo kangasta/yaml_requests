@@ -21,33 +21,38 @@ def _print_versions():
 
 NO_PLAN = 251
 INVALID_PLAN = 252
+INTERRUPTED = 253
 
 
 def main():
     args = get_argparser().parse_args()
     logger = RequestLogger(animations=args.animation, colors=args.colors)
 
-    if args.version:
-        _print_versions()
-        exit(0)
-
-    if not args.plan_file:
-        logger.error('No requests plan file provided.')
-        exit(NO_PLAN)
-
-    variables_override = parse_variables(args.variables)
-
     try:
-        plan = load_plan_file(args.plan_file)
-        requests, options, variables = parse_plan(
-            plan, variables_override=variables_override)
-    except FileNotFoundError:
-        logger.error(f'Did not find plan file in {args.plan_file}.')
-        exit(NO_PLAN)
-    except (ValueError, AssertionError,) as error:
-        logger.error(str(error))
-        exit(INVALID_PLAN)
+        if args.version:
+            _print_versions()
+            exit(0)
 
-    runner = PlanRunner(plan.get('name'), options, variables, logger)
-    num_errors = runner.run(requests)
-    exit(min(num_errors, 250))
+        if not args.plan_file:
+            logger.error('No requests plan file provided.')
+            exit(NO_PLAN)
+
+        variables_override = parse_variables(args.variables)
+
+        try:
+            plan = load_plan_file(args.plan_file)
+            requests, options, variables = parse_plan(
+                plan, variables_override=variables_override)
+        except FileNotFoundError:
+            logger.error(f'Did not find plan file in {args.plan_file}.')
+            exit(NO_PLAN)
+        except (ValueError, AssertionError,) as error:
+            logger.error(str(error))
+            exit(INVALID_PLAN)
+
+        runner = PlanRunner(plan.get('name'), options, variables, logger)
+        num_errors = runner.run(requests)
+        exit(min(num_errors, 250))
+    except KeyboardInterrupt:
+        logger.stop_progress_animation()
+        exit(INTERRUPTED)
