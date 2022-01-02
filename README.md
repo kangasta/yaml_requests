@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/kangasta/yaml_requests/actions/workflows/ci.yml/badge.svg)](https://github.com/kangasta/yaml_requests/actions/workflows/ci.yml)
 [![Release](https://github.com/kangasta/yaml_requests/actions/workflows/release.yml/badge.svg)](https://github.com/kangasta/yaml_requests/actions/workflows/release.yml)
+[![Maintainability](https://api.codeclimate.com/v1/badges/c1f5aaa1355b50f202d8/maintainability)](https://codeclimate.com/github/kangasta/yaml_requests/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/c1f5aaa1355b50f202d8/test_coverage)](https://codeclimate.com/github/kangasta/yaml_requests/test_coverage)
 
 A simple python app for sending a set of consecutive HTTP requests defined in YAML requests plan.
 
