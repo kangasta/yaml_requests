@@ -28,7 +28,8 @@ def _fit_to_width(text):
         else:
             i += 1
 
-    return f'{text[:(i + j)]}\033[0m…'
+    clear_formatting = '\033[0m' if re.search(r'\033\[[0-9]+m', text) else ''
+    return f'{text[:(i + j)]}{clear_formatting}…'
 
 
 def _print_spinner_and_text(text, stop_event):
@@ -43,7 +44,7 @@ def _response_output(request):
     def _format_output(output):
         if not output.endswith('\n'):
             output = f'{output}\n'
-        output = output.replace('\n', '\n  ')
+        output = output.replace('\n', '\n  ').rstrip(' ')
         return f'\n  {output}'
 
     output = request.options.output
@@ -52,12 +53,16 @@ def _response_output(request):
     try:
         if not output:
             return ''
+        elif output.lower() == 'text':
+            return _format_output(response.text)
         elif output.lower() == 'json':
             pretty_json = json.dumps(response.json(), indent=2)
             return _format_output(pretty_json)
         elif output.lower() in ('yml', 'yaml'):
             pretty_yaml = yaml.dump(response.json())
             return _format_output(pretty_yaml)
+        else:
+            return ''
     except BaseException:
         return ''
 
