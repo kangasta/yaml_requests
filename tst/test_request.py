@@ -5,6 +5,8 @@ from jinja2.exceptions import TemplateError
 from yaml_requests.utils.template import Environment
 from yaml_requests._request import Assertion, Request, RequestState
 
+from _utils import MockResponse
+
 class RequestStateTest(TestCase):
     def test_init_with_unknown_state_raises(self):
         with self.assertRaises(ValueError):
@@ -37,13 +39,6 @@ REQUEST_WITH_ASSERT = {
     'get': dict(url='http://localhost:5000'),
     'assert': 'var == 3'
 }
-
-class MockResponse:
-    def __init__(self, ok):
-        self.ok = ok
-
-    def __call__(self, *args, **kwargs):
-        return self
 
 
 class RequestTest(TestCase):
