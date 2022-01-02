@@ -15,7 +15,7 @@ pip install yaml_requests
 
 ## Usage
 
-The app is used to execute HTTP requests defined in YAML files. The YAML file must contain main-level key `requests`, that contains an array of requests, where each item of the list is a request object. The request object contains at least a method key (`get`, `post`, `options`, ...) which value is passed to `requests.request(...)` function.
+The app is used to execute HTTP requests defined in YAML files. The YAML file must contain main-level key `requests`, that contains an array of requests, where each item of the list is a request object. The request object contains at least a method key (`get`, `post`, `options`, ...) which value is passed to [`requests.request`](https://docs.python-requests.org/en/latest/api/#requests.request) function, or to [`requests.Session.request`](https://docs.python-requests.org/en/latest/api/#requests.Session.request) if plan level option `session` is truthy.
 
 Minimal YAML request plan should thus include requests array, with single item in it:
 
@@ -29,7 +29,7 @@ In addition to this basic behavior, more advanced features are provided as well:
 
 - All value fields in requests array items support jinja2 templating.
 - Variables can be defined in YAML request plan and overridden from commandline arguments.
-- Response of the most recent request is stored in `response` variable.
+- Response of the most recent request is stored in `response` variable as [`requests.Response`](https://docs.python-requests.org/en/latest/api/#requests.Response) object.
 - Responses can be stored as variables with `register` keyword.
 - Response can be verified with assertions.
 
