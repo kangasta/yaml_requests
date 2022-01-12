@@ -53,22 +53,6 @@ def load_plan_file(filename):
     return plan
 
 
-def parse_plan(plan, options_override=None, variables_override=None):
-    if options_override is None:
-        options_override = {}
-    if variables_override is None:
-        variables_override = {}
-
-    options = {**plan.get('options', {}), **options_override}
-    variables = {**plan.get('variables', {}), **variables_override}
-    requests = plan.get('requests')
-
-    if not requests or not isinstance(requests, list):
-        raise AssertionError('Plan must contain requests array.')
-
-    return (requests, options, variables, )
-
-
 def parse_variables(raw_variables):
     variables = {}
 

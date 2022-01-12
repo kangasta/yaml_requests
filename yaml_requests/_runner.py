@@ -5,29 +5,28 @@ from ._request import Request
 
 
 class PlanRunner:
-    def __init__(self, name, options, variables, logger):
-        self._name = name
-        self._options = options
+    def __init__(self, plan, logger):
+        self._plan = plan
         self._env = Environment()
         self._session = Session()
 
-        for name, value in variables.items():
+        for name, value in self._plan.variables.items():
             self._env.register(name, value)
 
         self._logger = logger
 
     def _request(self, *args, **kwargs):
-        if self._options.get('session'):
+        if self._plan.options.session:
             return self._session.request(*args, **kwargs)
         return request(*args, **kwargs)
 
-    def run(self, requests):
-        self._logger.title(self._name, len(requests))
+    def run(self):
+        self._logger.title(self._plan.name, len(self._plan.requests))
 
         num_errors = 0
 
-        for request_dict in requests:
-            skip = not self._options.get('ignore_errors') and num_errors > 0
+        for request_dict in self._plan.requests:
+            skip = not self._plan.options.ignore_errors and num_errors > 0
 
             request = Request(request_dict, self._env, skip)
 
