@@ -4,17 +4,17 @@ from unittest import TestCase
 from yaml_requests.utils.args import load_plan_file
 from yaml_requests._plan import Plan
 
-TST_DIR = os.path.dirname(os.path.realpath(__file__))
+from _utils import plan_path
 
 class PlanTest(TestCase):
     def test_parse_invalid_plan(self):
-        plan_dict = load_plan_file(f'{TST_DIR}/invalid_plan.yml')
+        plan_dict = load_plan_file(plan_path('invalid_plan.yml'))
         with self.assertRaises(AssertionError):
             Plan(plan_dict)
 
     def test_parse_valid_plan(self):
         for plan_file in ['minimal_plan.yml', 'full_plan.yml']:
-            plan_dict = load_plan_file(f'{TST_DIR}/{plan_file}')
+            plan_dict = load_plan_file(plan_path(plan_file))
             Plan(plan_dict)
 
     def test_parse_plan_overrides(self):
@@ -22,7 +22,7 @@ class PlanTest(TestCase):
         variables_override = dict(hostname='github.com')
 
         for plan_file in ['minimal_plan.yml', 'full_plan.yml']:
-            plan_dict = load_plan_file(f'{TST_DIR}/{plan_file}')
+            plan_dict = load_plan_file(plan_path(plan_file))
             plan = Plan(
                 plan_dict,
                 options_override=options_override,

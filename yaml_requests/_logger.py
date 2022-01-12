@@ -40,33 +40,6 @@ def _print_spinner_and_text(text, stop_event):
     print('\r', end='')
 
 
-def _response_output(request):
-    def _format_output(output):
-        if not output.endswith('\n'):
-            output = f'{output}\n'
-        output = output.replace('\n', '\n  ').rstrip(' ')
-        return f'\n  {output}'
-
-    output = request.options.output
-    response = request.response
-
-    try:
-        if not output:
-            return ''
-        elif output.lower() == 'text':
-            return _format_output(response.text)
-        elif output.lower() == 'json':
-            pretty_json = json.dumps(response.json(), indent=2)
-            return _format_output(pretty_json)
-        elif output.lower() in ('yml', 'yaml'):
-            pretty_yaml = yaml.dump(response.json())
-            return _format_output(pretty_yaml)
-        else:
-            return ''
-    except BaseException:
-        return ''
-
-
 def get_indicator(state_or_ok):
     if state_or_ok in (RequestState.SUCCESS, RequestState.NOT_RAISED, True,):
         return ('green', '✔',)
@@ -147,6 +120,43 @@ class RequestLogger:
 
         return f'{text}\n' if text else ''
 
+    def _headers_text(self, response):
+        return '\n'.join(
+            f'{self.bold(key)}: {value}' for key,
+            value in response.headers.items())
+
+    def _response_output_text(self, response, output):
+        def _format_output(output):
+            if not output.endswith('\n'):
+                output = f'{output}\n'
+            output = output.replace('\n', '\n  ').rstrip(' ')
+            return f'\n  {output}'
+
+        try:
+            if not output:
+                return ''
+            elif output.lower() == 'headers':
+                return _format_output(self._headers_text(response))
+            elif output.lower() == 'text':
+                return _format_output(response.text)
+            elif output.lower() == 'json':
+                pretty_json = json.dumps(response.json(), indent=2)
+                return _format_output(pretty_json)
+            elif output.lower() in ('yml', 'yaml'):
+                pretty_yaml = yaml.dump(response.json())
+                return _format_output(pretty_yaml)
+            else:
+                return ''
+        except BaseException:
+            return ''
+
+    def _response_text(self, request):
+        output = request.options.output
+        output = output if isinstance(output, list) else [output]
+        response = request.response
+
+        return ''.join(self._response_output_text(response, i) for i in output)
+
     def start_request(self, request):
         if not self._animations:
             return
@@ -179,6 +189,6 @@ class RequestLogger:
             f'{self._get_method_text(request)}\n  '
             f'{code_text}{message_separator}{message_text}\n'
             f'{self._get_assertion_text(request)}'
-            f'{_response_output(request)}')
+            f'{self._response_text(request)}')
 
         print(text)
