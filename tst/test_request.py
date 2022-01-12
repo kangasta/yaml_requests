@@ -12,6 +12,13 @@ class RequestStateTest(TestCase):
         with self.assertRaises(ValueError):
             RequestState('UNKNOWN')
 
+    def test_request_state_equality(self):
+        self.assertEqual(RequestState(RequestState.ERROR), RequestState.ERROR)
+        self.assertEqual(RequestState(RequestState.ERROR), RequestState(RequestState.ERROR))
+
+        self.assertNotEqual(RequestState(RequestState.ERROR), RequestState.SUCCESS)
+        self.assertNotEqual(RequestState(RequestState.SUCCESS), RequestState(RequestState.ERROR))
+
 class AssertionTest(TestCase):
     def test_ok_raises_if_not_executed(self):
         assertion = Assertion('var is undefined')

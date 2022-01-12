@@ -34,6 +34,9 @@ class RequestState:
         self.message = message
 
     def __eq__(self, other):
+        if isinstance(other, RequestState):
+            return self.state == other.state
+
         return self.state == other
 
     def __str__(self):
