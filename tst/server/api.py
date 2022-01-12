@@ -1,5 +1,5 @@
 from datetime import datetime
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 from os import getenv
 from random import uniform
 from time import sleep
@@ -19,6 +19,12 @@ def _error(msg, status=400):
 
 def _timestamp():
     return f'{datetime.utcnow().isoformat()}Z'
+
+@app.route("/")
+@app.route("/<path:path>")
+def static_route(path=None):
+    simulate_delay()
+    return send_from_directory('static', path or 'index.html')
 
 @app.route('/queue', methods=['GET'])
 def queue_route():

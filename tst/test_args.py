@@ -3,7 +3,6 @@ from unittest import TestCase
 
 from yaml_requests.utils.args import get_argparser, parse_variables
 
-TST_DIR = os.path.dirname(os.path.realpath(__file__))
 
 class ArgsTest(TestCase):
     def test_parse_variables(self):

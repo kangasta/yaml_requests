@@ -5,7 +5,7 @@ from unittest import TestCase
 from unittest.mock import patch
 import yaml
 
-from yaml_requests._logger import _fit_to_width, _response_output
+from yaml_requests._logger import RequestLogger, _fit_to_width
 
 from _utils import get_sent_mock_request, SIMPLE_REQUEST, RESPONSE_JSON
 
@@ -30,6 +30,7 @@ class RequestLoggerTest(TestCase):
             f'{FORMATTED_TEXT[:19]}\033[0m…')
 
     def test_response_output(self):
+        logger = RequestLogger(False, False)
         for output, expected in [
             ('unknown', ''),
             (
@@ -44,9 +45,10 @@ class RequestLoggerTest(TestCase):
                 'output': output
             })
 
-            self.assertEqual(_response_output(request), expected)
+            self.assertEqual(logger._response_text(request), expected)
 
     def test_response_output_handles_error(self):
+        logger = RequestLogger(False, False)
         content = '{not json}'
 
         for output, expected in [
@@ -58,4 +60,4 @@ class RequestLoggerTest(TestCase):
                 **SIMPLE_REQUEST,
                 'output': output
             },content=content)
-            self.assertEqual(_response_output(request), expected)
+            self.assertEqual(logger._response_text(request), expected)

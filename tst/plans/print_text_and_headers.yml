@@ -1,0 +1,13 @@
+variables:
+  base_url: http://localhost:5000
+requests:
+- get:
+    url: "{{ base_url }}/"
+  output:
+  - headers
+  - text
+  assert:
+  - name: Response took less than a second
+    expression: response.elapsed.total_seconds() < 1
+  - name: Response contains "test target" text
+    expression: "'test target' in response.text"

@@ -1,5 +1,6 @@
+from contextlib import redirect_stdout
+from io import StringIO
 from multiprocessing import Process, set_start_method
-import os
 import platform
 from requests import get
 from time import sleep
@@ -10,6 +11,7 @@ from unittest.mock import patch
 from yaml_requests import main, __version__
 
 from server.api import app
+from _utils import plan_path
 
 # Use fork to start target API. TODO: check for alternative fix
 if platform.system() != 'Linux':
@@ -17,7 +19,6 @@ if platform.system() != 'Linux':
 
 NO_PLAN = 251
 INVALID_PLAN = 252
-TST_DIR = os.path.dirname(os.path.realpath(__file__))
 
 class TestConsole:
     def __init__(self):
@@ -59,8 +60,8 @@ class MainTest(TestCase):
         for args, exit_code in [
             ([], NO_PLAN),
             (['file_not_found'], NO_PLAN),
-            ([f'{TST_DIR}/test_main.py'], INVALID_PLAN),
-            ([f'{TST_DIR}/invalid_plan.yml'], INVALID_PLAN),
+            ([plan_path('invalid_extension.py')], INVALID_PLAN),
+            ([plan_path('invalid_plan.yml')], INVALID_PLAN),
         ]:
             with self.assertRaises(TestExit):
                 with patch('sys.argv', ['yaml_requests', *args]):
@@ -72,17 +73,18 @@ class MainTest(TestCase):
     @patch('builtins.print')
     def test_main_minimal(self, print_mock, exit_mock):
         for extension in ['yml', 'json']:
-            with self.assertRaises(TestExit):
-                with patch('sys.argv', ['yaml_requests', f'{TST_DIR}/minimal_plan.{extension}']):
-                    main()
+            with self.subTest(extension=extension):
+                with self.assertRaises(TestExit):
+                    with patch('sys.argv', ['yaml_requests', plan_path(f'minimal_plan.{extension}')]):
+                        main()
 
-            exit_mock.assert_called_with(0)
+                exit_mock.assert_called_with(0)
 
     @patch('builtins.exit', side_effect=exit_mock_implementation)
     @patch('builtins.print')
     def test_main_skipped(self, print_mock, exit_mock):
         with self.assertRaises(TestExit):
-            with patch('sys.argv', ['yaml_requests', f'{TST_DIR}/skipped.yml']):
+            with patch('sys.argv', ['yaml_requests', plan_path('skipped.yml')]):
                 main()
 
         exit_mock.assert_called_with(1)
@@ -91,7 +93,7 @@ class MainTest(TestCase):
     @patch('builtins.print')
     def test_main_ignore_errors(self, print_mock, exit_mock):
         with self.assertRaises(TestExit):
-            with patch('sys.argv', ['yaml_requests', f'{TST_DIR}/invalid_url.yml']):
+            with patch('sys.argv', ['yaml_requests', plan_path('invalid_url.yml')]):
                 main()
 
         exit_mock.assert_called_with(3)
@@ -120,7 +122,20 @@ class IntegrationTest(TestCase):
     @patch('builtins.print')
     def test_main_build_queue(self, print_mock, exit_mock):
         with self.assertRaises(TestExit):
-            with patch('sys.argv', ['yaml_requests', f'{TST_DIR}/build_queue.yml']):
+            with patch('sys.argv', ['yaml_requests', plan_path('build_queue.yml')]):
                 main()
 
+        exit_mock.assert_called_with(0)
+
+    @patch('builtins.exit', side_effect=exit_mock_implementation)
+    def test_main_multiple_outputs(self, exit_mock):
+        with self.assertRaises(TestExit):
+            with redirect_stdout(StringIO()) as f:
+                with patch('sys.argv', ['yaml_requests', '--no-animation', '--no-colors', plan_path('print_text_and_headers.yml')]):
+                    main()
+
+        output = f.getvalue()
+
+        self.assertIn('Content-Type: text/html', output)
+        self.assertIn('<title>Test target for yaml_requests</title>', output)
         exit_mock.assert_called_with(0)

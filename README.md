@@ -75,7 +75,7 @@ requests:
   output: yaml
 ```
 
-These two examples are also available in [tst](./tst) directory and can be executed with:
+These two examples are also available in [tst/plans](./tst/plans) directory and can be executed with:
 
 ```sh
 yaml_requests tst/minimal_plan.yml
