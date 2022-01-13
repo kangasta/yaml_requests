@@ -1,5 +1,6 @@
 from os import system
 import platform
+from traceback import print_exc
 
 from jinja2 import __version__ as _jinja2_version
 from yaml import __version__ as _pyyaml_version
@@ -10,6 +11,13 @@ from ._logger import RequestLogger
 from ._plan import Plan
 from ._runner import PlanRunner
 from ._version import __version__
+
+
+UNKNOWN_ERROR_MSG = (
+    'Caught unexpected error, see traceback and description below. '
+    'If this seems like a bug to you, please consider creating a issue in '
+    'https://github.com/kangasta/yaml_requests/issues.\n'
+)
 
 
 def _print_versions():
@@ -24,6 +32,7 @@ def _print_versions():
 NO_PLAN = 251
 INVALID_PLAN = 252
 INTERRUPTED = 253
+UNKNOWN_ERROR = 254
 
 
 def main():
@@ -37,11 +46,11 @@ def main():
     try:
         if args.version:
             _print_versions()
-            exit(0)
+            return 0
 
         if not args.plan_file:
             logger.error('No requests plan file provided.')
-            exit(NO_PLAN)
+            return NO_PLAN
 
         variables_override = parse_variables(args.variables)
 
@@ -50,14 +59,19 @@ def main():
             plan = Plan(plan_dict, variables_override=variables_override)
         except FileNotFoundError:
             logger.error(f'Did not find plan file in {args.plan_file}.')
-            exit(NO_PLAN)
+            return NO_PLAN
         except (ValueError, AssertionError,) as error:
             logger.error(str(error))
-            exit(INVALID_PLAN)
+            return INVALID_PLAN
 
         runner = PlanRunner(plan, logger)
         num_errors = runner.run()
-        exit(min(num_errors, 250))
+        return min(num_errors, 250)
     except KeyboardInterrupt:
         logger.stop_progress_animation()
-        exit(INTERRUPTED)
+        return INTERRUPTED
+    except BaseException:
+        logger.stop_progress_animation()
+        logger.error(UNKNOWN_ERROR_MSG)
+        print_exc()
+        return UNKNOWN_ERROR
