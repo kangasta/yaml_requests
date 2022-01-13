@@ -78,8 +78,8 @@ requests:
 These two examples are also available in [tst/plans](./tst/plans) directory and can be executed with:
 
 ```sh
-yaml_requests tst/minimal_plan.yml
-yaml_requests tst/build_queue.yml
+yaml_requests tst/plans/minimal_plan.yml
+yaml_requests tst/plans/build_queue.yml
 ```
 
 See `yaml_requests --help` for full CLI usage.
