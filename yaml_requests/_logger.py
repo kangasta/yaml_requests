@@ -40,12 +40,21 @@ def _print_spinner_and_text(text, stop_event):
     print('\r', end='')
 
 
-def get_indicator(state_or_ok):
-    if state_or_ok in (RequestState.SUCCESS, RequestState.NOT_RAISED, True,):
+def get_assertion_status(assertion):
+    if not assertion.executed:
+        return RequestState.SKIPPED
+    elif assertion.ok:
+        return RequestState.SUCCESS
+    else:
+        return RequestState.ERROR
+
+
+def get_indicator(state):
+    if state in (RequestState.SUCCESS, RequestState.NOT_RAISED,):
         return ('green', '✔',)
-    elif state_or_ok in (RequestState.FAILURE, RequestState.ERROR, False,):
+    elif state in (RequestState.FAILURE, RequestState.ERROR,):
         return ('red', '✘',)
-    elif state_or_ok == RequestState.SKIPPED:
+    elif state == RequestState.SKIPPED:
         return ('blue', '⮟',)
 
 
@@ -77,7 +86,7 @@ class RequestLogger:
 
     def _get_indicator_text(self, request=None, assertion=None):
         color, symbol = get_indicator(
-            request.state if request else assertion.ok)
+            request.state if request else get_assertion_status(assertion))
         return self.color(symbol, color)
 
     def _get_name_text(self, request):

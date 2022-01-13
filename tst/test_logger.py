@@ -1,13 +1,19 @@
+from contextlib import redirect_stdout
+from io import StringIO
 import json
 from os import terminal_size
 from textwrap import indent
 from unittest import TestCase
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 import yaml
 
-from yaml_requests._logger import RequestLogger, _fit_to_width
+from requests import RequestException
 
-from _utils import get_sent_mock_request, SIMPLE_REQUEST, RESPONSE_JSON
+from yaml_requests.utils.template import Environment
+from yaml_requests._logger import RequestLogger, _fit_to_width
+from yaml_requests._request import Request
+
+from _utils import get_sent_mock_request, SIMPLE_REQUEST, RESPONSE_JSON, REQUEST_WITH_ASSERT
 
 TEXT = '\r- Get queued items'
 FORMATTED_TEXT = '\r\033[1m- Get queued items\033[22m'
@@ -61,3 +67,12 @@ class RequestLoggerTest(TestCase):
                 'output': output
             },content=content)
             self.assertEqual(logger._response_text(request), expected)
+
+    def test_log_errored_request_with_asserts(self):
+        logger = RequestLogger(False, False)
+        request = Request(REQUEST_WITH_ASSERT, Environment())
+        request_mock = MagicMock(side_effect=RequestException)
+
+        request.send(request_mock)
+        with redirect_stdout(StringIO()):
+            logger.finish_request(request)

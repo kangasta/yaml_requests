@@ -65,6 +65,10 @@ class Assertion:
             self.expression = raw_assertion
 
     @property
+    def executed(self):
+        return self._ok is not None
+
+    @property
     def ok(self):
         if self._ok is None:
             raise RuntimeError('Assertion has not been executed yet.')
