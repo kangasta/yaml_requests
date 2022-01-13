@@ -8,6 +8,10 @@ RESPONSE_JSON = dict(message='Mock respose text content')
 SIMPLE_REQUEST = dict(
     get=dict(url='http://localhost:5000'),
 )
+REQUEST_WITH_ASSERT = {
+    'get': dict(url='http://localhost:5000'),
+    'assert': 'var == 3'
+}
 TST_DIR = os.path.dirname(os.path.realpath(__file__))
 
 class MockResponse:

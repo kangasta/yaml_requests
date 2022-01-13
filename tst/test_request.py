@@ -5,7 +5,7 @@ from jinja2.exceptions import TemplateError
 from yaml_requests.utils.template import Environment
 from yaml_requests._request import Assertion, Request, RequestState
 
-from _utils import MockResponse
+from _utils import MockResponse, REQUEST_WITH_ASSERT
 
 class RequestStateTest(TestCase):
     def test_init_with_unknown_state_raises(self):
@@ -41,11 +41,6 @@ REQUEST_WITH_VARIABLE = dict(
 REQUEST_WITOUT_METHOD = dict(
     name='HTTP method missing'
 )
-
-REQUEST_WITH_ASSERT = {
-    'get': dict(url='http://localhost:5000'),
-    'assert': 'var == 3'
-}
 
 
 class RequestTest(TestCase):
