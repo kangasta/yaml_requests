@@ -1,0 +1,16 @@
+options:
+  session:
+    headers:
+      test-header: "{{ header | default('header-value') }}"
+    cookies:
+      test-cookie: cookie-value
+variables:
+  base_url: http://localhost:5000
+requests:
+- get:
+    url: "{{ base_url }}/"
+  assert:
+  - name: Request contains test-header
+    expression: "'test-header' in response.request.headers"
+  - name: Request contains test-cookie
+    expression: "'test-cookie' in response.request.headers.Cookie"

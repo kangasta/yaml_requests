@@ -109,12 +109,17 @@ class IntegrationTest(TestCase):
         self._server.terminate()
         self._server.join()
 
-    @patch('builtins.print')
-    def test_main_build_queue(self, print_mock):
-        with patch('sys.argv', ['yaml_requests', plan_path('build_queue.yml')]):
-            code = main()
+    def test_plan_succeeds(self):
+        for plan in [
+            'use_session_defaults.yml',
+            'build_queue.yml',
+        ]:
+            with self.subTest(plan=plan):
+                with redirect_stdout(StringIO()) as f:
+                    with patch('sys.argv', ['yaml_requests', '--no-animation', '--no-colors', plan_path(plan)]):
+                        code = main()
 
-        self.assertEqual(code, 0)
+                self.assertEqual(code, 0)
 
     def test_main_multiple_outputs(self):
         with redirect_stdout(StringIO()) as f:

@@ -1,8 +1,10 @@
 import os
-from unittest import TestCase
+from unittest import TestCase, runner
 
 from yaml_requests.utils.args import load_plan_file
 from yaml_requests._plan import Plan
+from yaml_requests._runner import PlanRunner
+from yaml_requests._logger import RequestLogger
 
 from _utils import plan_path
 
@@ -30,3 +32,12 @@ class PlanTest(TestCase):
 
             self.assertEqual(options_override.get('session'), plan.options.session)
             self.assertDictEqual(variables_override, plan.variables)
+
+    def test_parse_session_options(self):
+        plan_dict = load_plan_file(plan_path('use_session_defaults.yml'))
+        plan = Plan(plan_dict)
+        runner = PlanRunner(plan, RequestLogger(False, False))
+        session = runner._session
+
+        self.assertEqual(session.headers.get('TEST-HEADER'), 'header-value')
+        self.assertEqual(session.cookies.get('test-cookie'), 'cookie-value')
