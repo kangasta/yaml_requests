@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
 from yaml_requests import main
 
-main()
+code = main()
+exit(code)

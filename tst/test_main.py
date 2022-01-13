@@ -27,76 +27,67 @@ class TestConsole:
     def print_mock_implementation(self, *args, **kwargs):
         self.content += ' '.join(str(a) for a in args) + '\n'
 
-class TestExit(Exception):
-    def __init__(self, exit_code):
-        super().__init__()
-        self.exit_code = exit_code
-
-def exit_mock_implementation(exit_code):
-    raise TestExit(exit_code)
-
 class StartsWith(str):
     def __eq__(self, other):
         return other.startswith(self)
 
 class MainTest(TestCase):
-    @patch('builtins.exit', side_effect=exit_mock_implementation)
     @patch('builtins.print')
-    def test_main_version(self, print_mock, exit_mock):
+    def test_main_version(self, print_mock):
         console = TestConsole()
         print_mock.side_effect = console.print_mock_implementation
 
-        with self.assertRaises(TestExit) as raised:
-            with patch('sys.argv', ['pullnrun', '--version']):
-                main()
+        with patch('sys.argv', ['pullnrun', '--version']):
+            code = main()
 
-        self.assertEqual(0, raised.exception.exit_code)
+        self.assertEqual(code, 0)
 
         self.assertIn(__version__, console.content)
 
-    @patch('builtins.exit', side_effect=exit_mock_implementation)
     @patch('builtins.print')
-    def test_main_exit_codes(self, print_mock, exit_mock):
+    def test_main_exit_codes(self, print_mock):
         for args, exit_code in [
             ([], NO_PLAN),
             (['file_not_found'], NO_PLAN),
             ([plan_path('invalid_extension.py')], INVALID_PLAN),
             ([plan_path('invalid_plan.yml')], INVALID_PLAN),
         ]:
-            with self.assertRaises(TestExit):
-                with patch('sys.argv', ['yaml_requests', *args]):
-                    main()
+            with patch('sys.argv', ['yaml_requests', *args]):
+                code = main()
 
-            exit_mock.assert_called_with(exit_code)
+            self.assertEqual(code, exit_code)
 
-    @patch('builtins.exit', side_effect=exit_mock_implementation)
     @patch('builtins.print')
-    def test_main_minimal(self, print_mock, exit_mock):
+    def test_main_minimal(self, print_mock):
         for extension in ['yml', 'json']:
             with self.subTest(extension=extension):
-                with self.assertRaises(TestExit):
-                    with patch('sys.argv', ['yaml_requests', plan_path(f'minimal_plan.{extension}')]):
-                        main()
+                with patch('sys.argv', ['yaml_requests', plan_path(f'minimal_plan.{extension}')]):
+                    code = main()
 
-                exit_mock.assert_called_with(0)
+                self.assertEqual(code, 0)
 
-    @patch('builtins.exit', side_effect=exit_mock_implementation)
     @patch('builtins.print')
-    def test_main_skipped(self, print_mock, exit_mock):
-        with self.assertRaises(TestExit):
-            with patch('sys.argv', ['yaml_requests', plan_path('skipped.yml')]):
-                main()
+    def test_main_skipped(self, print_mock):
+        with patch('sys.argv', ['yaml_requests', plan_path('skipped.yml')]):
+            code = main()
 
-        exit_mock.assert_called_with(1)
+        self.assertEqual(code, 1)
 
-    @patch('builtins.exit', side_effect=exit_mock_implementation)
     @patch('builtins.print')
-    def test_main_ignore_errors(self, print_mock, exit_mock):
-        with self.assertRaises(TestExit):
-            with patch('sys.argv', ['yaml_requests', plan_path('invalid_url.yml')]):
-                main()
+    def test_main_ignore_errors(self, print_mock):
+        with patch('sys.argv', ['yaml_requests', plan_path('invalid_url.yml')]):
+            code = main()
 
-        exit_mock.assert_called_with(3)
+        self.assertEqual(code, 3)
+
+    @patch('builtins.print')
+    @patch('yaml_requests._main.Plan', side_effect=RuntimeError)
+    def test_main_unkown_error(self, plan_mock, print_mock):
+        with patch('sys.argv', ['yaml_requests', plan_path('build_queue.yml')]):
+            code = main()
+
+        self.assertEqual(code, 254) # Unkown error
+
 
 class IntegrationTest(TestCase):
     @classmethod
@@ -118,24 +109,20 @@ class IntegrationTest(TestCase):
         self._server.terminate()
         self._server.join()
 
-    @patch('builtins.exit', side_effect=exit_mock_implementation)
     @patch('builtins.print')
-    def test_main_build_queue(self, print_mock, exit_mock):
-        with self.assertRaises(TestExit):
-            with patch('sys.argv', ['yaml_requests', plan_path('build_queue.yml')]):
-                main()
+    def test_main_build_queue(self, print_mock):
+        with patch('sys.argv', ['yaml_requests', plan_path('build_queue.yml')]):
+            code = main()
 
-        exit_mock.assert_called_with(0)
+        self.assertEqual(code, 0)
 
-    @patch('builtins.exit', side_effect=exit_mock_implementation)
-    def test_main_multiple_outputs(self, exit_mock):
-        with self.assertRaises(TestExit):
-            with redirect_stdout(StringIO()) as f:
-                with patch('sys.argv', ['yaml_requests', '--no-animation', '--no-colors', plan_path('print_text_and_headers.yml')]):
-                    main()
+    def test_main_multiple_outputs(self):
+        with redirect_stdout(StringIO()) as f:
+            with patch('sys.argv', ['yaml_requests', '--no-animation', '--no-colors', plan_path('print_text_and_headers.yml')]):
+                code = main()
 
+        self.assertEqual(code, 0)
         output = f.getvalue()
 
         self.assertIn('Content-Type: text/html', output)
         self.assertIn('<title>Test target for yaml_requests</title>', output)
-        exit_mock.assert_called_with(0)
