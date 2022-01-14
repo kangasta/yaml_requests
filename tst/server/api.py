@@ -65,3 +65,9 @@ def builds_item_complete_route(build_id):
 
     builds[build_id]['finished'] = _timestamp()
     return '', 204
+
+numbers = dict(count=0)
+@app.route('/numbers/count', methods=['GET'])
+def numbers_count_route():
+    numbers['count'] += 1
+    return jsonify(dict(count=numbers.get('count')))

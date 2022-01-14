@@ -10,6 +10,7 @@ class PlanOptions:
 
         self.session = self._options.get('session', False)
         self.ignore_errors = self._options.get('ignore_errors')
+        self.repeat_while = self._options.get('repeat_while')
 
 
 class Plan:

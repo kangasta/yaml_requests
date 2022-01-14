@@ -80,9 +80,16 @@ class RequestLogger:
         error_text = self.bold(self.color('ERROR:', 'red'))
         print(f'{error_text} {text}')
 
-    def title(self, name, num_requests):
+    def _repeat_text(self, repeat_index):
+        if repeat_index is None:
+            return ''
+        return f' (repeat_index={repeat_index})'
+
+    def title(self, name, num_requests, repeat_index=None):
         name_text = f'{self.bold(name)}\n' if name else ''
-        print(f'{name_text}Sending {num_requests} requests:\n')
+        print(
+            f'{name_text}Sending {num_requests} requests'
+            f'{self._repeat_text(repeat_index)}:\n')
 
     def _get_indicator_text(self, request=None, assertion=None):
         color, symbol = get_indicator(
