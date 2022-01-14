@@ -113,6 +113,7 @@ class IntegrationTest(TestCase):
         for plan in [
             'use_session_defaults.yml',
             'build_queue.yml',
+            'repeat_while.yml',
         ]:
             with self.subTest(plan=plan):
                 with redirect_stdout(StringIO()) as f:

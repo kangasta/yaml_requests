@@ -37,23 +37,51 @@ class PlanRunner:
             return self._session.request(*args, **kwargs)
         return request(*args, **kwargs)
 
+    def _has_repeat_condition(self):
+        return bool(self._plan.options.repeat_while)
+
+    def _check_repeat_condition(self):
+        repeat_while = self._plan.options.repeat_while
+        if isinstance(repeat_while, str):
+            return bool(self._env.resolve_expression(repeat_while))
+
+        return bool(repeat_while)
+
     def run(self):
-        self._logger.title(self._plan.name, len(self._plan.requests))
-
         num_errors = 0
+        repeat_index = 0 if self._has_repeat_condition() else None
 
-        for request_dict in self._plan.requests:
-            skip = not self._plan.options.ignore_errors and num_errors > 0
+        break_repeat = False
+        repeat_while = True
 
-            request = Request(request_dict, self._env, skip)
+        ignore_errors = self._plan.options.ignore_errors
 
-            if request.state is None:
-                self._logger.start_request(request)
-                request.send(self._request)
+        while repeat_while and not break_repeat:
+            self._env.register('repeat_index', repeat_index)
+            self._logger.title(
+                self._plan.name,
+                len(self._plan.requests),
+                repeat_index=repeat_index)
 
-            self._logger.finish_request(request)
+            for request_dict in self._plan.requests:
+                skip = not ignore_errors and num_errors > 0
 
-            if not request.state.ok:
-                num_errors += 1
+                request = Request(request_dict, self._env, skip)
+
+                if request.state is None:
+                    self._logger.start_request(request)
+                    request.send(self._request)
+
+                self._logger.finish_request(request)
+
+                if not request.state.ok:
+                    num_errors += 1
+
+            break_repeat = not ignore_errors and num_errors > 0
+            repeat_while = (
+                True if repeat_index == 0 else self._check_repeat_condition())
+
+            if self._has_repeat_condition():
+                repeat_index += 1
 
         return num_errors

@@ -34,6 +34,7 @@ In addition to this basic behavior, more advanced features are provided as well:
 - Response of the most recent request is stored in `response` variable as [`requests.Response`](https://docs.python-requests.org/en/latest/api/#requests.Response) object.
 - Responses can be stored as variables with `register` keyword.
 - Response can be verified with assertions.
+- Plan execution can be repeated by setting `repeate_while` option.
 
 More advanded example that can be run against dummy API provided by [tst/server/api.py](./tst/server/api.py):
 

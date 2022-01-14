@@ -1,0 +1,8 @@
+name: Repeat example
+options:
+  repeat_while: "response.json().count < 10"
+variables:
+  base_url: http://localhost:5000
+requests:
+- get:
+    url: "{{ base_url }}/numbers/count"
