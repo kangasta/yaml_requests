@@ -126,6 +126,26 @@ class IntegrationTest(TestCase):
             
             with self.subTest(plan=plan, function='run'):
                 code = run(plan_path(plan), RequestLogger())
+                self.assertEqual(code, 0)
+
+    def test_accessing_request_data(self):
+        logger = RequestLogger()
+        code = run(plan_path('full_plan.yml'), logger)
+        self.assertEqual(code, 0)
+
+        reqs = logger.requests
+        self.assertEqual(len(reqs), 2)
+        self.assertEqual(reqs[0].response.url, 'https://www.google.com/')
+
+    def test_run_override_variables(self):
+        logger = RequestLogger()
+        code = run(plan_path('full_plan.yml'), logger, dict(hostname='duckduckgo.com'))
+        self.assertEqual(code, 0)
+
+        reqs = logger.requests
+        self.assertEqual(len(reqs), 2)
+        self.assertEqual(reqs[0].response.url, 'https://duckduckgo.com/')
+
 
     def test_main_multiple_outputs(self):
         with redirect_stdout(StringIO()) as f:
