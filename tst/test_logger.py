@@ -10,7 +10,8 @@ import yaml
 from requests import RequestException
 
 from yaml_requests.utils.template import Environment
-from yaml_requests._logger import ConsoleLogger, _fit_to_width
+from yaml_requests.logger import ConsoleLogger
+from yaml_requests.logger._console import _fit_to_width
 from yaml_requests._request import Request
 
 from _utils import get_sent_mock_request, SIMPLE_REQUEST, RESPONSE_JSON, REQUEST_WITH_ASSERT
@@ -19,13 +20,13 @@ TEXT = '\r- Get queued items'
 FORMATTED_TEXT = '\r\033[1m- Get queued items\033[22m'
 
 class ConsoleLoggerTest(TestCase):
-    @patch('yaml_requests._logger.get_terminal_size')
+    @patch('yaml_requests.logger._console.get_terminal_size')
     def test_fit_to_width_no_truncate(self, get_width_mock):
         get_width_mock.return_value = terminal_size((18, 3))
         self.assertEqual(_fit_to_width(TEXT), TEXT)
         self.assertEqual(_fit_to_width(FORMATTED_TEXT), FORMATTED_TEXT)
 
-    @patch('yaml_requests._logger.get_terminal_size')
+    @patch('yaml_requests.logger._console.get_terminal_size')
     def test_fit_to_width_no_truncate(self, get_width_mock):
         get_width_mock.return_value = terminal_size((16, 3))
         self.assertEqual(

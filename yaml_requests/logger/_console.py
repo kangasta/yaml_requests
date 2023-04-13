@@ -4,7 +4,7 @@ import re
 from shutil import get_terminal_size
 from threading import Event, Thread
 
-from ._request import RequestState
+from .._request import RequestState
 
 # From cli-spinners (https://www.npmjs.com/package/cli-spinners)
 INTERVAL = 0.080  # seconds
@@ -196,7 +196,7 @@ class ConsoleLogger:
             self._active = None
 
     def finish_request(self, request):
-        self.stop_progress_animation()
+        self.close()
 
         name_text = self._get_name_text(request)
         name_separator = name_text and '\n  '

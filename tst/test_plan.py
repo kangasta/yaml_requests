@@ -4,7 +4,7 @@ from unittest import TestCase, runner
 from yaml_requests.utils.args import load_plan_file
 from yaml_requests._plan import Plan
 from yaml_requests._runner import PlanRunner
-from yaml_requests._logger import ConsoleLogger
+from yaml_requests.logger import ConsoleLogger
 
 from _utils import plan_path
 

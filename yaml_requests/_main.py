@@ -7,7 +7,7 @@ from yaml import __version__ as _pyyaml_version
 from requests import __version__ as _requests_version
 
 from .utils.args import get_argparser, load_plan_file, parse_variables
-from ._logger import ConsoleLogger
+from .logger import ConsoleLogger
 from ._plan import Plan
 from ._runner import PlanRunner
 from ._version import __version__
