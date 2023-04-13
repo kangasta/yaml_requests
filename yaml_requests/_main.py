@@ -7,16 +7,18 @@ from yaml import __version__ as _pyyaml_version
 from requests import __version__ as _requests_version
 
 from .utils.args import get_argparser, load_plan_file, parse_variables
-from ._logger import RequestLogger
+from ._logger import ConsoleLogger
 from ._plan import Plan
 from ._runner import PlanRunner
 from ._version import __version__
-
-
-UNKNOWN_ERROR_MSG = (
-    'Caught unexpected error, see traceback and description below. '
-    'If this seems like a bug to you, please consider creating a issue in '
-    'https://github.com/kangasta/yaml_requests/issues.\n'
+from .error import (
+    NoPlanError,
+    InterruptedError,
+    InvalidPlanError,
+    YamlRequestsError,
+    INVALID_PLAN,
+    UNKNOWN_ERROR,
+    UNKNOWN_ERROR_MSG,
 )
 
 
@@ -29,49 +31,53 @@ def _print_versions():
         ')')
 
 
-NO_PLAN = 251
-INVALID_PLAN = 252
-INTERRUPTED = 253
-UNKNOWN_ERROR = 254
-
-
 def main():
     # On windows, run shell command to enable ANSI code support
     if platform.system() == 'Windows':
         system('')
 
     args = get_argparser().parse_args()
-    logger = RequestLogger(animations=args.animation, colors=args.colors)
+
+    if args.version:
+        _print_versions()
+        return 0
+
+    logger = ConsoleLogger(animations=args.animation, colors=args.colors)
 
     try:
-        if args.version:
-            _print_versions()
-            return 0
-
-        if not args.plan_file:
-            logger.error('No requests plan file provided.')
-            return NO_PLAN
-
         variables_override = parse_variables(args.variables)
+    except ValueError as error:
+        logger.error(str(error))
+        return INVALID_PLAN
 
-        try:
-            plan_dict = load_plan_file(args.plan_file)
-            plan = Plan(plan_dict, variables_override=variables_override)
-        except FileNotFoundError:
-            logger.error(f'Did not find plan file in {args.plan_file}.')
-            return NO_PLAN
-        except (ValueError, AssertionError,) as error:
-            logger.error(str(error))
-            return INVALID_PLAN
-
-        runner = PlanRunner(plan, logger)
-        num_errors = runner.run()
+    try:
+        num_errors = run(args.plan_file, logger, variables_override)
         return min(num_errors, 250)
-    except KeyboardInterrupt:
-        logger.stop_progress_animation()
-        return INTERRUPTED
+    except YamlRequestsError as error:
+        logger.error(str(error))
+        return error.exit_code
     except BaseException:
-        logger.stop_progress_animation()
+        logger.close()
         logger.error(UNKNOWN_ERROR_MSG)
         print_exc()
         return UNKNOWN_ERROR
+
+
+def run(plan_file, logger, variables_override=None):
+    try:
+        if not plan_file:
+            raise NoPlanError()
+
+        try:
+            plan_dict = load_plan_file(plan_file)
+            plan = Plan(plan_dict, variables_override=variables_override)
+        except FileNotFoundError:
+            raise NoPlanError(plan_file)
+        except (ValueError, AssertionError,) as error:
+            raise InvalidPlanError(str(error))
+
+        runner = PlanRunner(plan, logger)
+        return runner.run()
+    except KeyboardInterrupt:
+        logger.close()
+        raise InterruptedError()

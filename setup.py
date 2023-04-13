@@ -24,7 +24,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     scripts=["bin/yaml_requests"],
     install_requires=[
-        "Jinja2~=2.0",
+        "Jinja2~=3.0",
         "pyyaml~=5.0",
         "requests~=2.0",
     ],
