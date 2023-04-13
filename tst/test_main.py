@@ -8,7 +8,8 @@ from time import sleep
 from unittest import TestCase
 from unittest.mock import patch
 
-from yaml_requests import main, __version__
+from yaml_requests import main, run, __version__
+from yaml_requests.logger import RequestLogger
 
 from server.api import app
 from _utils import plan_path
@@ -51,6 +52,7 @@ class MainTest(TestCase):
             (['file_not_found'], NO_PLAN),
             ([plan_path('invalid_extension.py')], INVALID_PLAN),
             ([plan_path('invalid_plan.yml')], INVALID_PLAN),
+            ([plan_path('build_queue.yml'), '--variable', 'no_value'], INVALID_PLAN),
         ]:
             with patch('sys.argv', ['yaml_requests', *args]):
                 code = main()
@@ -115,12 +117,15 @@ class IntegrationTest(TestCase):
             'build_queue.yml',
             'repeat_while.yml',
         ]:
-            with self.subTest(plan=plan):
+            with self.subTest(plan=plan, function='main'):
                 with redirect_stdout(StringIO()) as f:
                     with patch('sys.argv', ['yaml_requests', '--no-animation', '--no-colors', plan_path(plan)]):
                         code = main()
 
                 self.assertEqual(code, 0)
+            
+            with self.subTest(plan=plan, function='run'):
+                code = run(plan_path(plan), RequestLogger())
 
     def test_main_multiple_outputs(self):
         with redirect_stdout(StringIO()) as f:
