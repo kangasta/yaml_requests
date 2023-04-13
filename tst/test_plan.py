@@ -4,7 +4,7 @@ from unittest import TestCase, runner
 from yaml_requests.utils.args import load_plan_file
 from yaml_requests._plan import Plan
 from yaml_requests._runner import PlanRunner
-from yaml_requests._logger import RequestLogger
+from yaml_requests.logger import ConsoleLogger
 
 from _utils import plan_path
 
@@ -36,7 +36,7 @@ class PlanTest(TestCase):
     def test_parse_session_options(self):
         plan_dict = load_plan_file(plan_path('use_session_defaults.yml'))
         plan = Plan(plan_dict)
-        runner = PlanRunner(plan, RequestLogger(False, False))
+        runner = PlanRunner(plan, ConsoleLogger(False, False))
         session = runner._session
 
         self.assertEqual(session.headers.get('TEST-HEADER'), 'header-value')

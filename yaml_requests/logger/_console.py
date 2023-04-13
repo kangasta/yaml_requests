@@ -4,7 +4,7 @@ import re
 from shutil import get_terminal_size
 from threading import Event, Thread
 
-from ._request import RequestState
+from .._request import RequestState
 
 # From cli-spinners (https://www.npmjs.com/package/cli-spinners)
 INTERVAL = 0.080  # seconds
@@ -58,7 +58,7 @@ def get_indicator(state):
         return ('blue', '⮟',)
 
 
-class RequestLogger:
+class ConsoleLogger:
     def __init__(self, animations, colors):
         self._animations = animations
         self._colors = colors
@@ -76,7 +76,11 @@ class RequestLogger:
             return text
         return f'\033[{COLORS[color]}m{text}\033[0m'
 
-    def error(self, text):
+    def error(self, error):
+        text = str(error)
+        if not text:
+            return
+
         error_text = self.bold(self.color('ERROR:', 'red'))
         print(f'{error_text} {text}')
 
@@ -185,14 +189,14 @@ class RequestLogger:
         self._stop_event.clear()
         self._active.start()
 
-    def stop_progress_animation(self):
+    def close(self):
         self._stop_event.set()
         if self._active:
             self._active.join()
             self._active = None
 
     def finish_request(self, request):
-        self.stop_progress_animation()
+        self.close()
 
         name_text = self._get_name_text(request)
         name_separator = name_text and '\n  '
