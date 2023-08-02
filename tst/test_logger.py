@@ -39,13 +39,19 @@ class ConsoleLoggerTest(TestCase):
     def test_response_output(self):
         logger = ConsoleLogger(False, False)
         for output, expected in [
-            ('unknown', ''),
+            ('unknown', '\n  ? unknown output entry [unknown], expected one of [headers, request_headers, request_body, response_headers, response_body, text, json, yml, yaml]\n'),
             (
                 'json',
-                f'\n{indent(json.dumps(RESPONSE_JSON, indent=2), "  ")}\n'
+                '\n  < body: ' + json.dumps(RESPONSE_JSON, indent=2).rstrip(' \n').replace('\n', '\n  < ') + '\n'
             ),
-            ('yml', f'\n  {yaml.dump(RESPONSE_JSON)}'),
-            ('yaml', f'\n  {yaml.dump(RESPONSE_JSON)}'),
+            (
+                'yml',
+                '\n  < body: ' + yaml.dump(RESPONSE_JSON, default_flow_style=False).rstrip(' \n').replace('\n', '\n  < ') + '\n'
+            ),
+            (
+                'yaml',
+                '\n  < body: ' + yaml.dump(RESPONSE_JSON, default_flow_style=False).rstrip(' \n').replace('\n', '\n  < ') + '\n'
+            ),
         ]:
             request = get_sent_mock_request({
                 **SIMPLE_REQUEST,
@@ -59,7 +65,7 @@ class ConsoleLoggerTest(TestCase):
         content = '{not json}'
 
         for output, expected in [
-            ('text', f'\n  {content}\n'),
+            ('text', f'\n  < body: {content}\n'),
             ('json', ''),
             ('yaml', '')
         ]:
