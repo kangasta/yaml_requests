@@ -27,7 +27,9 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
-      run: pip install -r requirements.txt
+      run: |
+        pip install -r requirements.txt
+        yaml_requests --version
     - name: Run static analysis and unittests
       run: |
         pycodestyle yaml_requests
