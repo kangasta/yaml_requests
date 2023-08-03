@@ -39,18 +39,34 @@ class ConsoleLoggerTest(TestCase):
     def test_response_output(self):
         logger = ConsoleLogger(False, False)
         for output, expected in [
-            ('unknown', '\n  ? unknown output entry [unknown], expected one of [headers, request_headers, request_body, response_headers, response_body, text, json, yml, yaml]\n'),
+            ('unknown', '\n  ? Unknown output entry [unknown], expected one of [headers, request_headers, request_body, response_headers, response_body, text, json, yml, yaml]\n'),
+            (
+                'request_body',
+                '\n  > ' + json.dumps(json.loads(SIMPLE_REQUEST['body']), indent=2).rstrip(' \n').replace('\n', '\n  > ') + '\n'
+            ),
+            (
+                'request_headers',
+                '\n  > Accept: */*\n  > Content-Type: application/json\n'
+            ),
             (
                 'json',
-                '\n  < body: ' + json.dumps(RESPONSE_JSON, indent=2).rstrip(' \n').replace('\n', '\n  < ') + '\n'
+                '\n  < ' + json.dumps(RESPONSE_JSON, indent=2).rstrip(' \n').replace('\n', '\n  < ') + '\n'
+            ),
+            (
+                'response_body',
+                '\n  < ' + json.dumps(RESPONSE_JSON, indent=2).rstrip(' \n').replace('\n', '\n  < ') + '\n'
+            ),
+            (
+                'response_headers',
+                '\n  < Content-Type: application/json\n  < Server: MockResponse/0.0\n'
             ),
             (
                 'yml',
-                '\n  < body: ' + yaml.dump(RESPONSE_JSON, default_flow_style=False).rstrip(' \n').replace('\n', '\n  < ') + '\n'
+                '\n  < ' + yaml.dump(RESPONSE_JSON, default_flow_style=False).rstrip(' \n').replace('\n', '\n  < ') + '\n'
             ),
             (
                 'yaml',
-                '\n  < body: ' + yaml.dump(RESPONSE_JSON, default_flow_style=False).rstrip(' \n').replace('\n', '\n  < ') + '\n'
+                '\n  < ' + yaml.dump(RESPONSE_JSON, default_flow_style=False).rstrip(' \n').replace('\n', '\n  < ') + '\n'
             ),
         ]:
             request = get_sent_mock_request({
@@ -65,7 +81,7 @@ class ConsoleLoggerTest(TestCase):
         content = '{not json}'
 
         for output, expected in [
-            ('text', f'\n  < body: {content}\n'),
+            ('text', f'\n  < {content}\n'),
             ('json', ''),
             ('yaml', '')
         ]:
