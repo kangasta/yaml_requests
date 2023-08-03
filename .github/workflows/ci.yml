@@ -27,7 +27,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
-      run: pip install -r requirements.txt
+      run: pip install -r requirements.txt && pip install "cython<3.0.0" wheel && pip install pyyaml==5.4.1 --no-build-isolation
     - name: Run static analysis and unittests
       run: |
         pycodestyle yaml_requests
