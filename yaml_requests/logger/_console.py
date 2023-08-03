@@ -140,33 +140,65 @@ class ConsoleLogger:
 
         return f'{text}\n' if text else ''
 
-    def _headers_text(self, response):
+    def _headers_text(self, headers):
         return '\n'.join(
             f'{self.bold(key)}: {value}' for key,
-            value in response.headers.items())
+            value in headers.items())
+
+    def _body_text(self, body, content_type):
+        if not isinstance(body, str):
+            body = body.decode('utf-8')
+
+        if content_type.startswith('application/json'):
+            return json.dumps(
+                json.loads(body), indent=2)
+        elif content_type.startswith('application/yaml'):
+            return yaml.dump(
+                yaml.safe_load(body), default_flow_style=False)
+        return body
 
     def _response_output_text(self, response, output):
-        def _format_output(output):
+        def _format_output(output, prefix='  '):
+            output = output.rstrip(' \n').replace('\n', f'\n{prefix}')
             if not output.endswith('\n'):
                 output = f'{output}\n'
-            output = output.replace('\n', '\n  ').rstrip(' ')
-            return f'\n  {output}'
+            return f'\n{prefix}{output}'
 
         try:
             if not output:
                 return ''
-            elif output.lower() == 'headers':
-                return _format_output(self._headers_text(response))
+            elif (output.lower() == 'headers' or
+                    output.lower() == 'response_headers'):
+                return _format_output(
+                    self._headers_text(
+                        response.headers), '  < ')
+            elif output.lower() == 'request_headers':
+                return _format_output(
+                    self._headers_text(response.request.headers), '  > ')
+            elif output.lower() == 'request_body':
+                raw_body = response.request.body
+                content_type = response.request.headers.get('Content-Type')
+                return _format_output(
+                    self._body_text(raw_body, content_type), '  > ')
+            elif output.lower() == 'response_body':
+                content_type = response.headers.get('Content-Type')
+                return _format_output(
+                    self._body_text(response.text, content_type), '  < ')
             elif output.lower() == 'text':
-                return _format_output(response.text)
+                return _format_output(response.text, '  < ')
             elif output.lower() == 'json':
                 pretty_json = json.dumps(response.json(), indent=2)
-                return _format_output(pretty_json)
+                return _format_output(pretty_json, '  < ')
             elif output.lower() in ('yml', 'yaml'):
-                pretty_yaml = yaml.dump(response.json())
-                return _format_output(pretty_yaml)
+                pretty_yaml = yaml.dump(
+                    response.json(), default_flow_style=False)
+                return _format_output(pretty_yaml, '  < ')
             else:
-                return ''
+                return _format_output(
+                    f'Unknown output entry [{output}], expected one of [\
+headers, request_headers, request_body, \
+response_headers, response_body, text, json, \
+yml, yaml]', '  ? ')
         except BaseException:
             return ''
 
