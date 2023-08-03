@@ -6,11 +6,11 @@ from jinja2 import __version__ as _jinja2_version
 from yaml import __version__ as _pyyaml_version
 from requests import __version__ as _requests_version
 
+from . import __version__
 from .utils.args import get_argparser, load_plan_file, parse_variables
 from .logger import ConsoleLogger
 from ._plan import Plan
 from ._runner import PlanRunner
-from ._version import __version__
 from .error import (
     NoPlanError,
     InterruptedError,
@@ -32,6 +32,12 @@ def _print_versions():
 
 
 def main():
+    '''Run the application.
+
+    Returns:
+        int: Exit code
+    '''
+
     # On windows, run shell command to enable ANSI code support
     if platform.system() == 'Windows':
         system('')
@@ -61,6 +67,15 @@ def main():
         logger.error(UNKNOWN_ERROR_MSG)
         print_exc()
         return UNKNOWN_ERROR
+
+
+def execute():
+    '''Run the application and exit with suitable exit code.
+
+    This is the entrypoint of the application.
+    '''
+    code = main()
+    exit(code)
 
 
 def run(plan_file, logger, variables_override=None):
