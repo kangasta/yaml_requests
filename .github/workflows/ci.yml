@@ -44,4 +44,4 @@ jobs:
           ${{github.workspace}}/coverage.xml:coverage.py
       env:
         CC_TEST_REPORTER_ID: ${{ secrets.CODECLIMATE_TOKEN }}
-      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.10'
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.10' && github.ref == 'refs/heads/main'
