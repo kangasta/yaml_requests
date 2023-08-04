@@ -36,7 +36,9 @@ In addition to this basic behavior, more advanced features are provided as well:
 - Response can be verified with assertions.
 - Plan execution can be repeated by setting `repeate_while` option.
 
-More advanded example that can be run against dummy API provided by [tst/server/api.py](./tst/server/api.py):
+## Advanced Example
+
+Here is an advanced example:
 
 ```yaml
 name: Simulate execution of a build from queue
@@ -76,12 +78,38 @@ requests:
   output: yaml
 ```
 
-These two examples are also available in [tst/plans](./tst/plans) directory and can be executed with:
+### Running the Example
+
+This example can be run against the dummy API provided by [tst/server/api.py](./tst/server/api.py)
+
+Start by making sure that `flask` is installed:
+
+```bash
+python -m pip install flask
+```
+
+Then run the test server:
+
+```bash
+python -m flask --app tst/server/api.py run
+```
+
+With the test server running execute the plan using the command:
+
+```bash
+yaml_requests tst/plans/build_queue.yml
+```
+
+### More examples
+
+There are more examples available in [tst/plans](./tst/plans) directory and can be executed as follows:
 
 ```sh
 yaml_requests tst/plans/minimal_plan.yml
 yaml_requests tst/plans/build_queue.yml
 ```
+
+## Help
 
 See `yaml_requests --help` for full CLI usage.
 
