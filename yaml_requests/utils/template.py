@@ -36,7 +36,7 @@ class Environment(_J2_Environment):
         single_start_eq = str_in.count(self.variable_start_string) == 1
         return start_eq and single_start_eq and end_eq
 
-    def _resolve_string(self, str_in):
+    def _resolve_string(self, str_in) -> any:
         if not self._contains_template(str_in):
             return str_in
 
@@ -47,6 +47,7 @@ class Environment(_J2_Environment):
             # predendence.
             str_in = str_in.replace('{{', '{{ (')
             str_in = str_in.replace('}}', ') | to_json }}')
+
         template = self.from_string(str_in)
         rendered = template.render()
 
@@ -58,14 +59,14 @@ class Environment(_J2_Environment):
 
         return rendered
 
-    def _resolve_dict(self, item):
+    def _resolve_dict(self, item) -> dict:
         return {key: self.resolve_templates(value)
                 for key, value in item.items()}
 
-    def _resolve_list(self, item):
+    def _resolve_list(self, item) -> list:
         return [self.resolve_templates(i) for i in item]
 
-    def resolve_templates(self, item):
+    def resolve_templates(self, item) -> any:
         if isinstance(item, str):
             return self._resolve_string(item)
         elif isinstance(item, list):

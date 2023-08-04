@@ -1,0 +1,29 @@
+# Plan with variables and their output
+variables:
+  foo: bar
+  dyn: "{{ 20 % 7 }}"
+  fiz: 12
+  bar:
+  - 1
+  - 2
+  baz:
+    name:
+      first: George
+      last: Harrison
+    age: 45
+  jinja2_template: >
+    {
+      {% for item in ["a", "list", "of", "items"] %}
+        "item-{{ loop.index }}": "{{ item }}",
+      {% endfor %}
+    }
+requests:
+- get:
+    url: https://google.com
+  assert:
+  - name: Check variable bar[1] == 2
+    expression: bar[1] == 2
+  - name: Check variable baz.name.first == 'George'
+    expression: baz.name.first == 'George'
+  output:
+  - variables
