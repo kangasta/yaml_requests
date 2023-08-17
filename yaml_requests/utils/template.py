@@ -41,7 +41,12 @@ class Environment(_J2_Environment):
             return str_in
 
         if self._is_template(str_in):
-            str_in = str_in.replace('}}', ' | to_json }}')
+            # If input is a template, append to_json filter to maintain
+            # original data type. This requires wrapping template expression
+            # from user in parentheses to avoid issues with operator
+            # predendence.
+            str_in = str_in.replace('{{', '{{ (')
+            str_in = str_in.replace('}}', ') | to_json }}')
         template = self.from_string(str_in)
         rendered = template.render()
 
