@@ -58,6 +58,10 @@ def get_indicator(state):
         return ('blue', '⮟',)
 
 
+def _is_printable(pair):
+    return isinstance(pair[1], (bool, dict, float, int, list, str))
+
+
 class ConsoleLogger:
     def __init__(self, animations, colors):
         self._animations = animations
@@ -145,6 +149,11 @@ class ConsoleLogger:
             f'{self.bold(key)}: {value}' for key,
             value in headers.items())
 
+    def _variables_text(self, variables):
+        return '\n'.join(
+            f'{self.bold(key)}: {value}' for key,
+            value in dict(filter(_is_printable, variables.items())).items())
+
     def _body_text(self, body, content_type):
         if not isinstance(body, str):
             body = body.decode('utf-8')
@@ -157,7 +166,9 @@ class ConsoleLogger:
                 yaml.safe_load(body), default_flow_style=False)
         return body
 
-    def _response_output_text(self, response, output):
+    def _response_output_text(self, request, output):
+        response = request.response
+
         def _format_output(output, prefix='  '):
             output = output.rstrip(' \n').replace('\n', f'\n{prefix}')
             if not output.endswith('\n'):
@@ -189,6 +200,9 @@ class ConsoleLogger:
             elif output.lower() == 'json':
                 pretty_json = json.dumps(response.json(), indent=2)
                 return _format_output(pretty_json, '  < ')
+            elif output.lower() == 'variables':
+                return _format_output(
+                    self._variables_text(request._template_env.globals), '  ')
             elif output.lower() in ('yml', 'yaml'):
                 pretty_yaml = yaml.dump(
                     response.json(), default_flow_style=False)
@@ -197,7 +211,7 @@ class ConsoleLogger:
                 return _format_output(
                     f'Unknown output entry [{output}], expected one of [\
 headers, request_headers, request_body, \
-response_headers, response_body, text, json, \
+response_headers, response_body, text, json, variables, \
 yml, yaml]', '  ? ')
         except BaseException:
             return ''
@@ -205,9 +219,8 @@ yml, yaml]', '  ? ')
     def _response_text(self, request):
         output = request.options.output
         output = output if isinstance(output, list) else [output]
-        response = request.response
 
-        return ''.join(self._response_output_text(response, i) for i in output)
+        return ''.join(self._response_output_text(request, i) for i in output)
 
     def start_request(self, request):
         if not self._animations:

@@ -11,7 +11,8 @@ class PlanRunner:
         self._env = Environment()
         self._prepare_session()
 
-        for name, value in self._plan.variables.items():
+        for name, value in self._env.resolve_templates(
+                self._plan.variables).items():
             self._env.register(name, value)
 
         self._logger = logger

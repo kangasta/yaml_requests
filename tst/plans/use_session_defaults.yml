@@ -14,3 +14,5 @@ requests:
     expression: "'test-header' in response.request.headers"
   - name: Request contains test-cookie
     expression: "'test-cookie' in response.request.headers.Cookie"
+  output:
+  - variables

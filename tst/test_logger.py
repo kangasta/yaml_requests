@@ -38,8 +38,10 @@ class ConsoleLoggerTest(TestCase):
 
     def test_response_output(self):
         logger = ConsoleLogger(False, False)
+        _env = Environment()
+        _env.globals["foo"] = "bar"
         for output, expected in [
-            ('unknown', '\n  ? Unknown output entry [unknown], expected one of [headers, request_headers, request_body, response_headers, response_body, text, json, yml, yaml]\n'),
+            ('unknown', '\n  ? Unknown output entry [unknown], expected one of [headers, request_headers, request_body, response_headers, response_body, text, json, variables, yml, yaml]\n'),
             (
                 'request_body',
                 '\n  > ' + json.dumps(json.loads(SIMPLE_REQUEST['body']), indent=2).rstrip(' \n').replace('\n', '\n  > ') + '\n'
@@ -61,6 +63,10 @@ class ConsoleLoggerTest(TestCase):
                 '\n  < Content-Type: application/json\n  < Server: MockResponse/0.0\n'
             ),
             (
+                'variables',
+                '\n  foo: bar\n'
+            ),
+            (
                 'yml',
                 '\n  < ' + yaml.dump(RESPONSE_JSON, default_flow_style=False).rstrip(' \n').replace('\n', '\n  < ') + '\n'
             ),
@@ -72,7 +78,7 @@ class ConsoleLoggerTest(TestCase):
             request = get_sent_mock_request({
                 **SIMPLE_REQUEST,
                 'output': output
-            })
+            }, _env)
 
             self.assertEqual(logger._response_text(request), expected)
 
