@@ -14,6 +14,7 @@ vars:
   dict:
     a: 1
     b: 2
+  json_s: '{"a": 1, "b": 2}'
 tests:
 - in: "{{ yes_s }}/asd/{{ no_s }}"
   out: yes/asd/no
@@ -66,3 +67,30 @@ tests:
       b:
         a: 1
         b: 2
+# string input should have string output
+- in: "{{ json_s }}"
+  out: '{"a": 1, "b": 2}'
+- in: "{{ dict }}"
+  out:
+    a: 1
+    b: 2
+# to_json output should be a string
+- in: "{{ dict | to_json }}"
+  out: '{"a": 1, "b": 2}'
+- in: '"{{ json_s }}"'
+  out: '"{"a": 1, "b": 2}"'
+# expressions inside template should work
+- in: "{{ 20 % 7 }}"
+  out: 6
+- in: "{{ list | join(', ') }}"
+  out: "1, 2, 3"
+- in: >-
+    {% if list %}<ul>{% for i in list %}
+      <li>{{ i }}</li>{% endfor %}
+    </ul>{% endif%}
+  out: >-
+    <ul>
+      <li>1</li>
+      <li>2</li>
+      <li>3</li>
+    </ul>
