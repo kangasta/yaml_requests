@@ -1,0 +1,60 @@
+[1mRepeat example[22m
+Sending 1 requests (repeat_index=0):
+
+[32m✔[0m [1mGET[22m http://localhost:5000/numbers/count
+  [1mHTTP 200[22m (<DURATION>)
+
+[1mRepeat example[22m
+Sending 1 requests (repeat_index=1):
+
+[32m✔[0m [1mGET[22m http://localhost:5000/numbers/count
+  [1mHTTP 200[22m (<DURATION>)
+
+[1mRepeat example[22m
+Sending 1 requests (repeat_index=2):
+
+[32m✔[0m [1mGET[22m http://localhost:5000/numbers/count
+  [1mHTTP 200[22m (<DURATION>)
+
+[1mRepeat example[22m
+Sending 1 requests (repeat_index=3):
+
+[32m✔[0m [1mGET[22m http://localhost:5000/numbers/count
+  [1mHTTP 200[22m (<DURATION>)
+
+[1mRepeat example[22m
+Sending 1 requests (repeat_index=4):
+
+[32m✔[0m [1mGET[22m http://localhost:5000/numbers/count
+  [1mHTTP 200[22m (<DURATION>)
+
+[1mRepeat example[22m
+Sending 1 requests (repeat_index=5):
+
+[32m✔[0m [1mGET[22m http://localhost:5000/numbers/count
+  [1mHTTP 200[22m (<DURATION>)
+
+[1mRepeat example[22m
+Sending 1 requests (repeat_index=6):
+
+[32m✔[0m [1mGET[22m http://localhost:5000/numbers/count
+  [1mHTTP 200[22m (<DURATION>)
+
+[1mRepeat example[22m
+Sending 1 requests (repeat_index=7):
+
+[32m✔[0m [1mGET[22m http://localhost:5000/numbers/count
+  [1mHTTP 200[22m (<DURATION>)
+
+[1mRepeat example[22m
+Sending 1 requests (repeat_index=8):
+
+[32m✔[0m [1mGET[22m http://localhost:5000/numbers/count
+  [1mHTTP 200[22m (<DURATION>)
+
+[1mRepeat example[22m
+Sending 1 requests (repeat_index=9):
+
+[32m✔[0m [1mGET[22m http://localhost:5000/numbers/count
+  [1mHTTP 200[22m (<DURATION>)
+

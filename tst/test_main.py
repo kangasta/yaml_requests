@@ -8,11 +8,17 @@ from time import sleep
 from unittest import TestCase
 from unittest.mock import patch
 
+from ciou.snapshot import rewind_and_read, snapshot, REPLACE_DURATION, REPLACE_TIMESTAMP, REPLACE_UUID
+
 from yaml_requests import main, run, __version__
 from yaml_requests.logger import RequestLogger
 
 from server.api import app
 from _utils import plan_path
+
+
+REPLACE = [REPLACE_TIMESTAMP, REPLACE_DURATION, REPLACE_UUID]
+
 
 # Use fork to start target API. TODO: check for alternative fix
 if platform.system() != 'Linux':
@@ -33,6 +39,8 @@ class StartsWith(str):
         return other.startswith(self)
 
 class MainTest(TestCase):
+    maxDiff = None
+
     @patch('builtins.print')
     def test_main_version(self, print_mock):
         console = TestConsole()
@@ -45,19 +53,23 @@ class MainTest(TestCase):
 
         self.assertIn(__version__, console.content)
 
-    @patch('builtins.print')
-    def test_main_exit_codes(self, print_mock):
-        for args, exit_code in [
-            ([], NO_PLAN),
-            (['file_not_found'], NO_PLAN),
-            ([plan_path('invalid_extension.py')], INVALID_PLAN),
-            ([plan_path('invalid_plan.yml')], INVALID_PLAN),
-            ([plan_path('build_queue.yml'), '--variable', 'no_value'], INVALID_PLAN),
+    def test_main_exit_codes(self):
+        for key, args, exit_code in [
+            ('empty_agrs', [], NO_PLAN),
+            ('file_not_found', ['file_not_found'], NO_PLAN),
+            ('invalid_extension', [plan_path('invalid_extension.py')], INVALID_PLAN),
+            ('invalid_plan', [plan_path('invalid_plan.yml')], INVALID_PLAN),
+            ('invalid_variable', [plan_path('build_queue.yml'), '--variable', 'no_value'], INVALID_PLAN),
         ]:
-            with patch('sys.argv', ['yaml_requests', *args]):
-                code = main()
+            with self.subTest(key=key, function='main'):
+                with redirect_stdout(StringIO()) as f:
+                    with patch('sys.argv', ['yaml_requests', *args]):
+                        code = main()
 
-            self.assertEqual(code, exit_code)
+                    actual = rewind_and_read(f)
+                    self.assertEqual(*snapshot(key, actual, replace=REPLACE))
+
+                self.assertEqual(code, exit_code)
 
     @patch('builtins.print')
     def test_main_minimal(self, print_mock):
@@ -68,10 +80,13 @@ class MainTest(TestCase):
 
                 self.assertEqual(code, 0)
 
-    @patch('builtins.print')
-    def test_main_skipped(self, print_mock):
-        with patch('sys.argv', ['yaml_requests', plan_path('skipped.yml')]):
-            code = main()
+    def test_main_skipped(self):
+        with redirect_stdout(StringIO()) as f:
+            with patch('sys.argv', ['yaml_requests', '--no-animation', plan_path('skipped.yml')]):
+                code = main()
+
+            actual = rewind_and_read(f)
+            self.assertEqual(*snapshot('skipped', actual, replace=REPLACE))
 
         self.assertEqual(code, 1)
 
@@ -92,6 +107,8 @@ class MainTest(TestCase):
 
 
 class IntegrationTest(TestCase):
+    maxDiff = None
+
     @classmethod
     def setUpClass(self):
         self._server = Process(target=app.run)
@@ -119,11 +136,15 @@ class IntegrationTest(TestCase):
         ]:
             with self.subTest(plan=plan, function='main'):
                 with redirect_stdout(StringIO()) as f:
-                    with patch('sys.argv', ['yaml_requests', '--no-animation', '--no-colors', plan_path(plan)]):
+                    with patch('sys.argv', ['yaml_requests', '--no-animation', plan_path(plan)]):
                         code = main()
 
+                    actual = rewind_and_read(f)
+                    key = plan.split('.')[0]
+                    self.assertEqual(*snapshot(key, actual, replace=REPLACE))
+
                 self.assertEqual(code, 0)
-            
+
             with self.subTest(plan=plan, function='run'):
                 code = run(plan_path(plan), RequestLogger())
                 self.assertEqual(code, 0)
