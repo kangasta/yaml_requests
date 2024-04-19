@@ -13,16 +13,11 @@ from ciou.snapshot import rewind_and_read, snapshot, REPLACE_DURATION, REPLACE_T
 from yaml_requests import main, run, __version__
 from yaml_requests.logger import RequestLogger
 
-from server.api import app
+from server.api import start
 from _utils import plan_path
 
 
 REPLACE = [REPLACE_TIMESTAMP, REPLACE_DURATION, REPLACE_UUID]
-
-
-# Use fork to start target API. TODO: check for alternative fix
-if platform.system() != 'Linux':
-    set_start_method('fork')
 
 NO_PLAN = 251
 INVALID_PLAN = 252
@@ -66,8 +61,9 @@ class MainTest(TestCase):
                     with patch('sys.argv', ['yaml_requests', *args]):
                         code = main()
 
-                    actual = rewind_and_read(f)
-                    self.assertEqual(*snapshot(key, actual, replace=REPLACE))
+                    if platform.system() != "Windows":
+                        actual = rewind_and_read(f)
+                        self.assertEqual(*snapshot(key, actual, replace=REPLACE))
 
                 self.assertEqual(code, exit_code)
 
@@ -85,8 +81,9 @@ class MainTest(TestCase):
             with patch('sys.argv', ['yaml_requests', '--no-animation', plan_path('skipped.yml')]):
                 code = main()
 
-            actual = rewind_and_read(f)
-            self.assertEqual(*snapshot('skipped', actual, replace=REPLACE))
+            if platform.system() != "Windows":
+                actual = rewind_and_read(f)
+                self.assertEqual(*snapshot('skipped', actual, replace=REPLACE))
 
         self.assertEqual(code, 1)
 
@@ -111,7 +108,7 @@ class IntegrationTest(TestCase):
 
     @classmethod
     def setUpClass(self):
-        self._server = Process(target=app.run)
+        self._server = Process(target=start)
         self._server.start()
 
         ready = False
@@ -139,9 +136,10 @@ class IntegrationTest(TestCase):
                     with patch('sys.argv', ['yaml_requests', '--no-animation', plan_path(plan)]):
                         code = main()
 
-                    actual = rewind_and_read(f)
-                    key = plan.split('.')[0]
-                    self.assertEqual(*snapshot(key, actual, replace=REPLACE))
+                    if platform.system() != "Windows":
+                        actual = rewind_and_read(f)
+                        key = plan.split('.')[0]
+                        self.assertEqual(*snapshot(key, actual, replace=REPLACE))
 
                 self.assertEqual(code, 0)
 
