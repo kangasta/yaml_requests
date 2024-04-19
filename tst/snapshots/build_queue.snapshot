@@ -1,31 +1,36 @@
-[1mSimulate execution of a build from queue[22m
+[1mSimulate execution of a build from queue[0m
 Sending 5 requests:
 
-[32m✔[0m [1mGet queued items[22m
-  [1mGET[22m http://localhost:5000/queue
-  [1mHTTP 200[22m (<DURATION>)
+[34m> [0m[1mGet queued items[0m                                                                          
+[32m✓ [0m[1mGet queued items[0m                                                                          
+  [1mGET[0m http://localhost:5000/queue
+  [1mHTTP 200[0m (<DURATION>)
 
-  [32m✔[0m Queue is not empty
-  [32m✔[0m Status code is 200
-  [32m✔[0m Request took less than 5 seconds
+  [32m✓ [0mQueue is not empty
+  [32m✓ [0mStatus code is 200
+  [32m✓ [0mRequest took less than 5 seconds
 
-[32m✔[0m [1mCreate build for first item in the queue (<UUID>)[22m
-  [1mPOST[22m http://localhost:5000/queue/<UUID>/init
-  [1mHTTP 201[22m (<DURATION>)
+[34m> [0m[1mCreate build for first item in the queue (<UUID>)[0m           
+[32m✓ [0m[1mCreate build for first item in the queue (<UUID>)[0m           
+  [1mPOST[0m http://localhost:5000/queue/<UUID>/init
+  [1mHTTP 201[0m (<DURATION>)
 
-[32m✔[0m [1mGet queued items[22m
-  [1mGET[22m http://localhost:5000/queue
-  [1mHTTP 200[22m (<DURATION>)
+[34m> [0m[1mGet queued items[0m                                                                          
+[32m✓ [0m[1mGet queued items[0m                                                                          
+  [1mGET[0m http://localhost:5000/queue
+  [1mHTTP 200[0m (<DURATION>)
 
-  [32m✔[0m Queue is shorter than initially
+  [32m✓ [0mQueue is shorter than initially
 
-[32m✔[0m [1mComplete the created build (<UUID>)[22m
-  [1mPOST[22m http://localhost:5000/builds/<UUID>/complete
-  [1mHTTP 204[22m (<DURATION>)
+[34m> [0m[1mComplete the created build (<UUID>)[0m                         
+[32m✓ [0m[1mComplete the created build (<UUID>)[0m                         
+  [1mPOST[0m http://localhost:5000/builds/<UUID>/complete
+  [1mHTTP 204[0m (<DURATION>)
 
-[32m✔[0m [1mOutput build details[22m
-  [1mGET[22m http://localhost:5000/builds/<UUID>
-  [1mHTTP 200[22m (<DURATION>)
+[34m> [0m[1mOutput build details[0m                                                                      
+[32m✓ [0m[1mOutput build details[0m                                                                      
+  [1mGET[0m http://localhost:5000/builds/<UUID>
+  [1mHTTP 200[0m (<DURATION>)
 
   < finished: '<TIMESTAMP>'
   < id: <UUID>

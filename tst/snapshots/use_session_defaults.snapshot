@@ -1,10 +1,11 @@
 Sending 1 requests:
 
-[32m✔[0m [1mGET[22m http://localhost:5000/
-  [1mHTTP 200[22m (<DURATION>)
+[34m> [0m[1mGET[0m http://localhost:5000/                                                                
+[32m✓ [0m[1mGET[0m http://localhost:5000/                                                                
+  [1mHTTP 200[0m (<DURATION>)
 
-  [32m✔[0m Request contains test-header
-  [32m✔[0m Request contains test-cookie
+  [32m✓ [0mRequest contains test-header
+  [32m✓ [0mRequest contains test-cookie
 
-  [1mbase_url[22m: http://localhost:5000
+  [1mbase_url[0m: http://localhost:5000
 

@@ -1,1 +1,1 @@
-[1m[31mERROR:[0m[22m Failed to recognize file type. File extension must be json, yaml, or yml.
+[31m[1mERROR:[0m Failed to recognize file type. File extension must be json, yaml, or yml.
