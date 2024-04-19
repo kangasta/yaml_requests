@@ -92,7 +92,8 @@ class ConsoleLogger:
         return ''
 
     def _get_method_text(self, request):
-        return f'{self._style(request.method, bold)} {request.params.get("url")}'
+        return (
+            f'{self._style(request.method, bold)} {request.params.get("url")}')
 
     def _get_response_code_text(self, request):
         response = request.response
