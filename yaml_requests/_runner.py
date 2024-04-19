@@ -64,6 +64,8 @@ class PlanRunner:
                 len(self._plan.requests),
                 repeat_index=repeat_index)
 
+            self._logger.start()
+
             for request_dict in self._plan.requests:
                 skip = not ignore_errors and num_errors > 0
 
@@ -77,6 +79,8 @@ class PlanRunner:
 
                 if not request.state.ok:
                     num_errors += 1
+
+            self._logger.close()
 
             break_repeat = not ignore_errors and num_errors > 0
             repeat_while = (

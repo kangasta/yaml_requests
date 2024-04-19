@@ -1,8 +1,9 @@
 from contextlib import redirect_stdout
 from io import StringIO
-from multiprocessing import Process, set_start_method
+from multiprocessing import Process
 import platform
 from requests import get
+import sys
 from time import sleep
 
 from unittest import TestCase
@@ -48,7 +49,8 @@ class MainTest(TestCase):
 
         self.assertIn(__version__, console.content)
 
-    def test_main_exit_codes(self):
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_main_exit_codes(self, out):
         for key, args, exit_code in [
             ('empty_agrs', [], NO_PLAN),
             ('file_not_found', ['file_not_found'], NO_PLAN),
@@ -57,15 +59,17 @@ class MainTest(TestCase):
             ('invalid_variable', [plan_path('build_queue.yml'), '--variable', 'no_value'], INVALID_PLAN),
         ]:
             with self.subTest(key=key, function='main'):
-                with redirect_stdout(StringIO()) as f:
-                    with patch('sys.argv', ['yaml_requests', *args]):
-                        code = main()
+                out.truncate(0)
+                out.seek(0)
 
-                    if platform.system() != "Windows":
-                        actual = rewind_and_read(f)
-                        self.assertEqual(*snapshot(key, actual, replace=REPLACE))
+                with patch('sys.argv', ['yaml_requests', *args]):
+                    code = main()
 
-                self.assertEqual(code, exit_code)
+                if platform.system() != "Windows":
+                    actual = rewind_and_read(out)
+                    self.assertEqual(*snapshot(key, actual, replace=REPLACE))
+
+            self.assertEqual(code, exit_code)
 
     @patch('builtins.print')
     def test_main_minimal(self, print_mock):
@@ -76,14 +80,14 @@ class MainTest(TestCase):
 
                 self.assertEqual(code, 0)
 
-    def test_main_skipped(self):
-        with redirect_stdout(StringIO()) as f:
-            with patch('sys.argv', ['yaml_requests', '--no-animation', plan_path('skipped.yml')]):
-                code = main()
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_main_skipped(self, out):
+        with patch('sys.argv', ['yaml_requests', '--no-animation', plan_path('skipped.yml')]):
+            code = main()
 
-            if platform.system() != "Windows":
-                actual = rewind_and_read(f)
-                self.assertEqual(*snapshot('skipped', actual, replace=REPLACE))
+        if platform.system() != "Windows":
+            actual = rewind_and_read(out)
+            self.assertEqual(*snapshot('skipped', actual, replace=REPLACE))
 
         self.assertEqual(code, 1)
 
@@ -125,23 +129,26 @@ class IntegrationTest(TestCase):
         self._server.terminate()
         self._server.join()
 
-    def test_plan_succeeds(self):
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_plan_succeeds(self, out):
         for plan in [
             'use_session_defaults.yml',
             'build_queue.yml',
             'repeat_while.yml',
         ]:
             with self.subTest(plan=plan, function='main'):
-                with redirect_stdout(StringIO()) as f:
-                    with patch('sys.argv', ['yaml_requests', '--no-animation', plan_path(plan)]):
-                        code = main()
+                out.truncate(0)
+                out.seek(0)
 
-                    if platform.system() != "Windows":
-                        actual = rewind_and_read(f)
-                        key = plan.split('.')[0]
-                        self.assertEqual(*snapshot(key, actual, replace=REPLACE))
+                with patch('sys.argv', ['yaml_requests', '--no-animation', plan_path(plan)]):
+                    code = main()
 
-                self.assertEqual(code, 0)
+                if platform.system() != "Windows":
+                    actual = rewind_and_read(out)
+                    key = plan.split('.')[0]
+                    self.assertEqual(*snapshot(key, actual, replace=REPLACE))
+
+            self.assertEqual(code, 0)
 
             with self.subTest(plan=plan, function='run'):
                 code = run(plan_path(plan), RequestLogger())
@@ -165,14 +172,13 @@ class IntegrationTest(TestCase):
         self.assertEqual(len(reqs), 2)
         self.assertEqual(reqs[0].response.url, 'https://duckduckgo.com/')
 
-
-    def test_main_multiple_outputs(self):
-        with redirect_stdout(StringIO()) as f:
-            with patch('sys.argv', ['yaml_requests', '--no-animation', '--no-colors', plan_path('print_text_and_headers.yml')]):
-                code = main()
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_main_multiple_outputs(self, out):
+        with patch('sys.argv', ['yaml_requests', '--no-animation', '--no-colors', plan_path('print_text_and_headers.yml')]):
+            code = main()
 
         self.assertEqual(code, 0)
-        output = f.getvalue()
+        output = out.getvalue()
 
         self.assertIn('Content-Type: text/html', output)
         self.assertIn('<title>Test target for yaml_requests</title>', output)

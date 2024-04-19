@@ -1,7 +1,7 @@
 from copy import deepcopy
 from jinja2.exceptions import TemplateError
 from requests.exceptions import RequestException
-
+from uuid import uuid4
 
 METHODS = ('GET', 'OPTIONS', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE',)
 EARLIER_ERRORS_SKIP = 'Request skipped due to earlier error.'
@@ -90,6 +90,7 @@ class Request:
         self._processed = None
         self._template_env = template_env
 
+        self.id = f'request-{uuid4()}'
         self.state = None
         self.response = None
 
