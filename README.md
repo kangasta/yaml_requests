@@ -97,7 +97,7 @@ python -m flask --app tst/server/api.py run
 With the test server running execute the plan using the command:
 
 ```bash
-yaml_requests tst/plans/build_queue.yml
+yaml_requests tst/plans/integration/build_queue.yml
 ```
 
 ### More examples
@@ -106,7 +106,7 @@ There are more examples available in [tst/plans](./tst/plans) directory and can 
 
 ```sh
 yaml_requests tst/plans/minimal_plan.yml
-yaml_requests tst/plans/build_queue.yml
+yaml_requests tst/plans/integration/build_queue.yml
 ```
 
 ## Help

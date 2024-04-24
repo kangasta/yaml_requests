@@ -22,7 +22,8 @@ class NoPlanError(YamlRequestsError):
         if not path:
             super().__init__('No requests plan file provided.', NO_PLAN)
         else:
-            super().__init__(f'Did not find plan file in {path}.', NO_PLAN)
+            super().__init__(
+                f'Did not find plan file in {", ".join(path)}.', NO_PLAN)
 
 
 class InvalidPlanError(YamlRequestsError):

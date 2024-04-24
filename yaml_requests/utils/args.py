@@ -1,6 +1,9 @@
 from argparse import ArgumentParser
 import json
+import os
 import yaml
+
+from ciou.types import ensure_list
 
 
 def get_argparser():
@@ -8,7 +11,7 @@ def get_argparser():
     parser.add_argument(
         'plan_file',
         type=str,
-        nargs='?',
+        nargs='*',
         help='Load requests plan from JSON or YAML file.')
     parser.add_argument(
         '-v', '--variable',
@@ -36,6 +39,27 @@ def get_argparser():
     return parser
 
 
+def has_known_extension(path):
+    for extension in ('.json', '.yaml', '.yml',):
+        if path.endswith(extension):
+            return True
+
+    return False
+
+
+def load_plan_files(paths, in_directory=False):
+    plans = []
+
+    for path in ensure_list(paths):
+        if os.path.isdir(path):
+            plans.extend(load_plan_files((os.path.join(path, i)
+                         for i in os.listdir(path)), in_directory=True))
+        elif has_known_extension(path) or not in_directory:
+            plans.append(load_plan_file(path))
+
+    return plans
+
+
 def load_plan_file(filename):
     if not filename:
         raise ValueError('No input file given.')
@@ -50,6 +74,7 @@ def load_plan_file(filename):
                 'Failed to recognize file type. '
                 'File extension must be json, yaml, or yml.')
 
+    plan['path'] = filename
     return plan
 
 

@@ -1,13 +1,32 @@
 from requests import request, Session
 from requests.cookies import cookiejar_from_dict
 
+from ciou.types import ensure_list
+
 from .utils.template import Environment
 from ._request import Request
 
 
+class PlansRunner:
+    def __init__(self, plans, logger):
+        self._plans = plans
+        self._logger = logger
+
+    def run(self):
+        num_errors = 0
+        for plan in ensure_list(self._plans):
+            display_filename = len(self._plans) > 1
+            runner = PlanRunner(plan, self._logger, display_filename)
+            num_errors += runner.run()
+
+        return num_errors
+
+
 class PlanRunner:
-    def __init__(self, plan, logger):
+    def __init__(self, plan, logger, display_filename=False):
         self._plan = plan
+        self._display_filename = display_filename
+
         self._env = Environment()
         self._prepare_session()
 
@@ -48,6 +67,18 @@ class PlanRunner:
 
         return bool(repeat_while)
 
+    @property
+    def _title(self):
+        name = self._plan.name
+        if not self._display_filename:
+            return name
+
+        path = self._plan.path
+        if name and path:
+            return f'{name} ({path})'
+
+        return path or name
+
     def run(self):
         num_errors = 0
         repeat_index = 0 if self._has_repeat_condition() else None
@@ -60,7 +91,7 @@ class PlanRunner:
         while repeat_while and not break_repeat:
             self._env.register('repeat_index', repeat_index)
             self._logger.title(
-                self._plan.name,
+                self._title,
                 len(self._plan.requests),
                 repeat_index=repeat_index)
 

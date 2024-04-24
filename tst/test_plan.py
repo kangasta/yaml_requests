@@ -34,7 +34,7 @@ class PlanTest(TestCase):
             self.assertDictEqual(variables_override, plan.variables)
 
     def test_parse_session_options(self):
-        plan_dict = load_plan_file(plan_path('use_session_defaults.yml'))
+        plan_dict = load_plan_file(plan_path('integration/use_session_defaults.yml'))
         plan = Plan(plan_dict)
         runner = PlanRunner(plan, ConsoleLogger(False, False))
         session = runner._session

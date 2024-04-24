@@ -1,0 +1,65 @@
+[1mRepeat example (/home/kangasta/github.com/yaml_requests/tst/plans/integration/repeat_while.yml)[0m
+Sending 1 requests (repeat_index=0):
+
+[34m> [0m[1mGET[0m http://localhost:5000/numbers/count                                                   
+[32m✓ [0m[1mGET[0m http://localhost:5000/numbers/count                                                   
+  [1mHTTP 200[0m (<DURATION>)
+
+[1mRepeat example (/home/kangasta/github.com/yaml_requests/tst/plans/integration/repeat_while.yml)[0m
+Sending 1 requests (repeat_index=1):
+
+[34m> [0m[1mGET[0m http://localhost:5000/numbers/count                                                   
+[32m✓ [0m[1mGET[0m http://localhost:5000/numbers/count                                                   
+  [1mHTTP 200[0m (<DURATION>)
+
+[1m/home/kangasta/github.com/yaml_requests/tst/plans/integration/use_session_defaults.yml[0m
+Sending 1 requests:
+
+[34m> [0m[1mGET[0m http://localhost:5000/                                                                
+[32m✓ [0m[1mGET[0m http://localhost:5000/                                                                
+  [1mHTTP 200[0m (<DURATION>)
+
+  [32m✓ [0mRequest contains test-header
+  [32m✓ [0mRequest contains test-cookie
+
+  [1mbase_url[0m: http://localhost:5000
+
+[1mSimulate execution of a build from queue (/home/kangasta/github.com/yaml_requests/tst/plans/integration/build_queue.yml)[0m
+Sending 5 requests:
+
+[34m> [0m[1mGet queued items[0m                                                                          
+[32m✓ [0m[1mGet queued items[0m                                                                          
+  [1mGET[0m http://localhost:5000/queue
+  [1mHTTP 200[0m (<DURATION>)
+
+  [32m✓ [0mQueue is not empty
+  [32m✓ [0mStatus code is 200
+  [32m✓ [0mRequest took less than 5 seconds
+
+[34m> [0m[1mCreate build for first item in the queue (<UUID>)[0m           
+[32m✓ [0m[1mCreate build for first item in the queue (<UUID>)[0m           
+  [1mPOST[0m http://localhost:5000/queue/<UUID>/init
+  [1mHTTP 201[0m (<DURATION>)
+
+[34m> [0m[1mGet queued items[0m                                                                          
+[32m✓ [0m[1mGet queued items[0m                                                                          
+  [1mGET[0m http://localhost:5000/queue
+  [1mHTTP 200[0m (<DURATION>)
+
+  [32m✓ [0mQueue is shorter than initially
+
+[34m> [0m[1mComplete the created build (<UUID>)[0m                         
+[32m✓ [0m[1mComplete the created build (<UUID>)[0m                         
+  [1mPOST[0m http://localhost:5000/builds/<UUID>/complete
+  [1mHTTP 204[0m (<DURATION>)
+
+[34m> [0m[1mOutput build details[0m                                                                      
+[32m✓ [0m[1mOutput build details[0m                                                                      
+  [1mGET[0m http://localhost:5000/builds/<UUID>
+  [1mHTTP 200[0m (<DURATION>)
+
+  < finished: '<TIMESTAMP>'
+  < id: <UUID>
+  < node: default
+  < started: '<TIMESTAMP>'
+

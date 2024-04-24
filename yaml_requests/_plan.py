@@ -25,6 +25,7 @@ class Plan:
         self._plan = deepcopy(plan_dict)
 
         self.name = self._plan.pop('name', None)
+        self.path = self._plan.pop('path', None)
         self.options = PlanOptions(self._plan, options_override)
         self.variables = {
             **self._plan.get('variables', {}), **variables_override}
