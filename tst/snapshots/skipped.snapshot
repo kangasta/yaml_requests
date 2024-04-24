@@ -1,0 +1,13 @@
+Sending 3 requests:
+
+[34m> [0m[1mGET[0m https://google.com/not_found                                                          
+[32m✓ [0m[1mGET[0m https://google.com/not_found                                                          
+  [1mHTTP 404[0m (<DURATION> code ignored.[0m
+
+[34m> [0m[1mGET[0m invalid                                                                               
+[31m✗ [0m[1mGET[0m invalid                                                                               
+  [1mERROR:[0m Invalid URL 'invalid': No scheme supplied. Perhaps you meant https://invalid?
+
+[35m- [0m[1mGET[0m https://google.com                                                                    
+  [1mSKIPPED:[0m Request skipped due to earlier error.
+

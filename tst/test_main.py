@@ -1,22 +1,24 @@
 from contextlib import redirect_stdout
 from io import StringIO
-from multiprocessing import Process, set_start_method
+from multiprocessing import Process
 import platform
 from requests import get
+import sys
 from time import sleep
 
 from unittest import TestCase
 from unittest.mock import patch
 
+from ciou.snapshot import rewind_and_read, snapshot, REPLACE_DURATION, REPLACE_TIMESTAMP, REPLACE_UUID
+
 from yaml_requests import main, run, __version__
 from yaml_requests.logger import RequestLogger
 
-from server.api import app
+from server.api import start
 from _utils import plan_path
 
-# Use fork to start target API. TODO: check for alternative fix
-if platform.system() != 'Linux':
-    set_start_method('fork')
+
+REPLACE = [REPLACE_TIMESTAMP, REPLACE_DURATION, REPLACE_UUID]
 
 NO_PLAN = 251
 INVALID_PLAN = 252
@@ -33,6 +35,8 @@ class StartsWith(str):
         return other.startswith(self)
 
 class MainTest(TestCase):
+    maxDiff = None
+
     @patch('builtins.print')
     def test_main_version(self, print_mock):
         console = TestConsole()
@@ -45,17 +49,25 @@ class MainTest(TestCase):
 
         self.assertIn(__version__, console.content)
 
-    @patch('builtins.print')
-    def test_main_exit_codes(self, print_mock):
-        for args, exit_code in [
-            ([], NO_PLAN),
-            (['file_not_found'], NO_PLAN),
-            ([plan_path('invalid_extension.py')], INVALID_PLAN),
-            ([plan_path('invalid_plan.yml')], INVALID_PLAN),
-            ([plan_path('build_queue.yml'), '--variable', 'no_value'], INVALID_PLAN),
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_main_exit_codes(self, out):
+        for key, args, exit_code in [
+            ('empty_agrs', [], NO_PLAN),
+            ('file_not_found', ['file_not_found'], NO_PLAN),
+            ('invalid_extension', [plan_path('invalid_extension.py')], INVALID_PLAN),
+            ('invalid_plan', [plan_path('invalid_plan.yml')], INVALID_PLAN),
+            ('invalid_variable', [plan_path('build_queue.yml'), '--variable', 'no_value'], INVALID_PLAN),
         ]:
-            with patch('sys.argv', ['yaml_requests', *args]):
-                code = main()
+            with self.subTest(key=key, function='main'):
+                out.truncate(0)
+                out.seek(0)
+
+                with patch('sys.argv', ['yaml_requests', *args]):
+                    code = main()
+
+                if platform.system() != "Windows":
+                    actual = rewind_and_read(out)
+                    self.assertEqual(*snapshot(key, actual, replace=REPLACE))
 
             self.assertEqual(code, exit_code)
 
@@ -68,10 +80,14 @@ class MainTest(TestCase):
 
                 self.assertEqual(code, 0)
 
-    @patch('builtins.print')
-    def test_main_skipped(self, print_mock):
-        with patch('sys.argv', ['yaml_requests', plan_path('skipped.yml')]):
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_main_skipped(self, out):
+        with patch('sys.argv', ['yaml_requests', '--no-animation', plan_path('skipped.yml')]):
             code = main()
+
+        if platform.system() != "Windows":
+            actual = rewind_and_read(out)
+            self.assertEqual(*snapshot('skipped', actual, replace=REPLACE))
 
         self.assertEqual(code, 1)
 
@@ -92,9 +108,11 @@ class MainTest(TestCase):
 
 
 class IntegrationTest(TestCase):
+    maxDiff = None
+
     @classmethod
     def setUpClass(self):
-        self._server = Process(target=app.run)
+        self._server = Process(target=start)
         self._server.start()
 
         ready = False
@@ -111,19 +129,27 @@ class IntegrationTest(TestCase):
         self._server.terminate()
         self._server.join()
 
-    def test_plan_succeeds(self):
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_plan_succeeds(self, out):
         for plan in [
             'use_session_defaults.yml',
             'build_queue.yml',
             'repeat_while.yml',
         ]:
             with self.subTest(plan=plan, function='main'):
-                with redirect_stdout(StringIO()) as f:
-                    with patch('sys.argv', ['yaml_requests', '--no-animation', '--no-colors', plan_path(plan)]):
-                        code = main()
+                out.truncate(0)
+                out.seek(0)
 
-                self.assertEqual(code, 0)
-            
+                with patch('sys.argv', ['yaml_requests', '--no-animation', plan_path(plan)]):
+                    code = main()
+
+                if platform.system() != "Windows":
+                    actual = rewind_and_read(out)
+                    key = plan.split('.')[0]
+                    self.assertEqual(*snapshot(key, actual, replace=REPLACE))
+
+            self.assertEqual(code, 0)
+
             with self.subTest(plan=plan, function='run'):
                 code = run(plan_path(plan), RequestLogger())
                 self.assertEqual(code, 0)
@@ -146,14 +172,13 @@ class IntegrationTest(TestCase):
         self.assertEqual(len(reqs), 2)
         self.assertEqual(reqs[0].response.url, 'https://duckduckgo.com/')
 
-
-    def test_main_multiple_outputs(self):
-        with redirect_stdout(StringIO()) as f:
-            with patch('sys.argv', ['yaml_requests', '--no-animation', '--no-colors', plan_path('print_text_and_headers.yml')]):
-                code = main()
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_main_multiple_outputs(self, out):
+        with patch('sys.argv', ['yaml_requests', '--no-animation', '--no-colors', plan_path('print_text_and_headers.yml')]):
+            code = main()
 
         self.assertEqual(code, 0)
-        output = f.getvalue()
+        output = out.getvalue()
 
         self.assertIn('Content-Type: text/html', output)
         self.assertIn('<title>Test target for yaml_requests</title>', output)

@@ -1,8 +1,10 @@
+from io import StringIO
 import json
+import sys
 import yaml
-import re
-from shutil import get_terminal_size
-from threading import Event, Thread
+
+from ciou.color import bold, colors, fg_red, fg_hi_black, no_color
+from ciou.progress import Checks, MessageStatus, Progress, OutputConfig, Update
 
 from .._request import RequestState
 
@@ -13,49 +15,22 @@ FRAMES = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
 COLORS = dict(red=31, green=32, yellow=33, blue=34, grey=90)
 
 
-def _fit_to_width(text):
-    max_len = get_terminal_size().columns
-    non_formatted_text = re.sub(r'\033\[[0-9]+m', '', text.replace('\r', ''))
-    if len(non_formatted_text) < max_len:
-        return text
-
-    i = 0
-    j = 0
-    while i < max_len - 2:
-        match = re.match(r'\r|\033\[[0-9]+m', text[(i + j):])
-        if match:
-            j += len(match.group(0))
-        else:
-            i += 1
-
-    clear_formatting = '\033[0m' if re.search(r'\033\[[0-9]+m', text) else ''
-    return f'{text[:(i + j)]}{clear_formatting}…'
-
-
-def _print_spinner_and_text(text, stop_event):
-    i = 0
-    while not stop_event.wait(INTERVAL):
-        print(_fit_to_width(f'\r{FRAMES[i % len(FRAMES)]} {text}'), end='')
-        i += 1
-    print('\r', end='')
-
-
 def get_assertion_status(assertion):
     if not assertion.executed:
-        return RequestState.SKIPPED
+        return MessageStatus.SKIPPED
     elif assertion.ok:
-        return RequestState.SUCCESS
+        return MessageStatus.SUCCESS
     else:
-        return RequestState.ERROR
+        return MessageStatus.ERROR
 
 
-def get_indicator(state):
+def get_status(state):
     if state in (RequestState.SUCCESS, RequestState.NOT_RAISED,):
-        return ('green', '✔',)
+        return MessageStatus.SUCCESS
     elif state in (RequestState.FAILURE, RequestState.ERROR,):
-        return ('red', '✘',)
+        return MessageStatus.ERROR
     elif state == RequestState.SKIPPED:
-        return ('blue', '⮟',)
+        return MessageStatus.SKIPPED
 
 
 def _is_printable(pair):
@@ -63,30 +38,42 @@ def _is_printable(pair):
 
 
 class ConsoleLogger:
-    def __init__(self, animations, colors):
-        self._animations = animations
-        self._colors = colors
+    def __init__(self, animations, colors, target=None):
+        if not target:
+            target = sys.stdout
 
-        self._active = None
-        self._stop_event = Event()
+        self._output_config = OutputConfig(
+            details_color=no_color,
+            disable_animation=(not animations),
+            disable_colors=(not colors),
+            target=target,
+        )
+        self._progress = None
 
-    def bold(self, text):
-        if not self._colors:
+    def start(self):
+        self._progress = Progress(config=self._output_config)
+        self._progress.start()
+
+    def _style(self, text, *color):
+        if self._output_config.disable_colors:
             return text
-        return f'\033[1m{text}\033[22m'
 
-    def color(self, text, color):
-        if not self._colors or color not in COLORS:
-            return text
-        return f'\033[{COLORS[color]}m{text}\033[0m'
+        return colors(*color)(text)
+
+    def _print(self, *args):
+        return print(*args, file=self._output_config.target)
+
+    def close(self):
+        if self._progress:
+            self._progress.stop()
 
     def error(self, error):
         text = str(error)
         if not text:
             return
 
-        error_text = self.bold(self.color('ERROR:', 'red'))
-        print(f'{error_text} {text}')
+        error_text = self._style('ERROR:', bold, fg_red)
+        self._print(f'{error_text} {text}')
 
     def _repeat_text(self, repeat_index):
         if repeat_index is None:
@@ -94,64 +81,62 @@ class ConsoleLogger:
         return f' (repeat_index={repeat_index})'
 
     def title(self, name, num_requests, repeat_index=None):
-        name_text = f'{self.bold(name)}\n' if name else ''
-        print(
+        name_text = f'{self._style(name, bold)}\n' if name else ''
+        self._print(
             f'{name_text}Sending {num_requests} requests'
             f'{self._repeat_text(repeat_index)}:\n')
 
-    def _get_indicator_text(self, request=None, assertion=None):
-        color, symbol = get_indicator(
-            request.state if request else get_assertion_status(assertion))
-        return self.color(symbol, color)
-
     def _get_name_text(self, request):
         if request.name:
-            return self.bold(request.name)
+            return self._style(request.name, bold)
         return ''
 
     def _get_method_text(self, request):
-        return f'{self.bold(request.method)} {request.params.get("url")}'
+        return (
+            f'{self._style(request.method, bold)} {request.params.get("url")}')
 
     def _get_response_code_text(self, request):
         response = request.response
         if response is None:
             return ''
 
-        code_text = self.bold(f'HTTP {response.status_code}')
+        code_text = self._style(f'HTTP {response.status_code}', bold)
         elapsed_ms = response.elapsed.total_seconds() * 1000
         not_raised_text = ''
         if request.state == RequestState.NOT_RAISED:
-            not_raised_text = self.color(
-                ' HTTP status code ignored.', 'grey')
+            not_raised_text = self._style(
+                ' HTTP status code ignored.', fg_hi_black)
 
         return f'{code_text} ({elapsed_ms:.3f} ms){not_raised_text}'
 
     def _get_message_text(self, request):
         message = request.state.message
 
-        type_text = self.bold(f'{str(request.state).upper()}:')
+        type_text = self._style(f'{str(request.state).upper()}:', bold)
         return f'{type_text} {message}' if message else ''
 
     def _get_assertion_text(self, request):
-        text = ''
-
         if request.state == RequestState.SKIPPED:
-            return text
+            return ''
 
+        checks = Checks()
         for assertion in request.assertions:
-            indicator = self._get_indicator_text(assertion=assertion)
-            text += f'\n  {indicator} {assertion.name}'
+            checks.push(Update(
+                message=assertion.name,
+                status=get_assertion_status(assertion),
+            ))
 
-        return f'{text}\n' if text else ''
+        text = checks.getvalue()
+        return f'\n{text}' if text else ''
 
     def _headers_text(self, headers):
         return '\n'.join(
-            f'{self.bold(key)}: {value}' for key,
+            f'{self._style(key, bold)}: {value}' for key,
             value in headers.items())
 
     def _variables_text(self, variables):
         return '\n'.join(
-            f'{self.bold(key)}: {value}' for key,
+            f'{self._style(key, bold)}: {value}' for key,
             value in dict(filter(_is_printable, variables.items())).items())
 
     def _body_text(self, body, content_type):
@@ -169,7 +154,7 @@ class ConsoleLogger:
     def _response_output_text(self, request, output):
         response = request.response
 
-        def _format_output(output, prefix='  '):
+        def _format_output(output, prefix=''):
             output = output.rstrip(' \n').replace('\n', f'\n{prefix}')
             if not output.endswith('\n'):
                 output = f'{output}\n'
@@ -181,38 +166,37 @@ class ConsoleLogger:
             elif (output.lower() == 'headers' or
                     output.lower() == 'response_headers'):
                 return _format_output(
-                    self._headers_text(
-                        response.headers), '  < ')
+                    self._headers_text(response.headers), '< ')
             elif output.lower() == 'request_headers':
                 return _format_output(
-                    self._headers_text(response.request.headers), '  > ')
+                    self._headers_text(response.request.headers), '> ')
             elif output.lower() == 'request_body':
                 raw_body = response.request.body
                 content_type = response.request.headers.get('Content-Type')
                 return _format_output(
-                    self._body_text(raw_body, content_type), '  > ')
+                    self._body_text(raw_body, content_type), '> ')
             elif output.lower() == 'response_body':
                 content_type = response.headers.get('Content-Type')
                 return _format_output(
-                    self._body_text(response.text, content_type), '  < ')
+                    self._body_text(response.text, content_type), '< ')
             elif output.lower() == 'text':
-                return _format_output(response.text, '  < ')
+                return _format_output(response.text, '< ')
             elif output.lower() == 'json':
                 pretty_json = json.dumps(response.json(), indent=2)
-                return _format_output(pretty_json, '  < ')
+                return _format_output(pretty_json, '< ')
             elif output.lower() == 'variables':
                 return _format_output(
-                    self._variables_text(request._template_env.globals), '  ')
+                    self._variables_text(request._template_env.globals))
             elif output.lower() in ('yml', 'yaml'):
                 pretty_yaml = yaml.dump(
                     response.json(), default_flow_style=False)
-                return _format_output(pretty_yaml, '  < ')
+                return _format_output(pretty_yaml, '< ')
             else:
                 return _format_output(
                     f'Unknown output entry [{output}], expected one of [\
 headers, request_headers, request_body, \
 response_headers, response_body, text, json, variables, \
-yml, yaml]', '  ? ')
+yml, yaml]', '? ')
         except BaseException:
             return ''
 
@@ -223,37 +207,32 @@ yml, yaml]', '  ? ')
         return ''.join(self._response_output_text(request, i) for i in output)
 
     def start_request(self, request):
-        if not self._animations:
-            return
-
         text = self._get_name_text(request) or self._get_method_text(request)
 
-        self._active = Thread(
-            target=_print_spinner_and_text, args=[
-                text, self._stop_event])
-        self._stop_event.clear()
-        self._active.start()
-
-    def close(self):
-        self._stop_event.set()
-        if self._active:
-            self._active.join()
-            self._active = None
+        self._progress.push(Update(
+            key=request.id,
+            message=text,
+            status=MessageStatus.STARTED,
+        ))
 
     def finish_request(self, request):
-        self.close()
-
         name_text = self._get_name_text(request)
-        name_separator = name_text and '\n  '
+        message = name_text or self._get_method_text(request)
+
+        method_text = name_text and f'{self._get_method_text(request)}\n'
         code_text = self._get_response_code_text(request)
         message_text = self._get_message_text(request)
         message_separator = '\n  ' if message_text and code_text else ''
 
-        text = (
-            f'{self._get_indicator_text(request)} {name_text}{name_separator}'
-            f'{self._get_method_text(request)}\n  '
+        details = (
+            f'{method_text}'
             f'{code_text}{message_separator}{message_text}\n'
             f'{self._get_assertion_text(request)}'
-            f'{self._response_text(request)}')
+            f'{self._response_text(request)}\n')
 
-        print(text)
+        self._progress.push(Update(
+            key=request.id,
+            message=message,
+            details=details,
+            status=get_status(request.state)
+        ))

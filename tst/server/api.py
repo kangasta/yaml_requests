@@ -10,6 +10,9 @@ app = Flask(__name__)
 queue = {str(uuid4()): dict(build_id=None, steps=[]) for _ in range(10)}
 builds = {}
 
+def start():
+    app.run()
+
 def simulate_delay():
     if getenv('SIMULATE_DELAY'):
         sleep(uniform(1,5))

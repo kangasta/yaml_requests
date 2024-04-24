@@ -2,6 +2,9 @@ class RequestLogger:
     def __init__(self):
         self._requests = []
 
+    def start(self):
+        pass
+
     @property
     def requests(self):
         return self._requests
