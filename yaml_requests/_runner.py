@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from requests import request, Session
 from requests.cookies import cookiejar_from_dict
 
@@ -7,19 +8,65 @@ from .utils.template import Environment
 from ._request import Request
 
 
+PASS = 0
+FAIL = 1
+TOTAL = 2
+
+
+class ListCounter:
+    def __init__(self, input):
+        if isinstance(input, list):
+            self._data = list(input)
+        else:
+            self._data = [0] * input
+
+    def increment(self, position):
+        self._data[position] += 1
+
+    def __getitem__(self, i):
+        return self._data[i]
+
+    @property
+    def data(self):
+        return list(self._data)
+
+    def __add__(self, other):
+        if isinstance(other, list):
+            other = ListCounter(other)
+        return ListCounter([sum(i) for i in zip(self.data, other.data)])
+
+
 class PlansRunner:
     def __init__(self, plans, logger):
         self._plans = plans
         self._logger = logger
 
     def run(self):
-        num_errors = 0
+        n_requests = ListCounter(3)
+        n_plans = ListCounter(3)
+
+        start = datetime.now()
+
         for plan in ensure_list(self._plans):
             display_filename = len(self._plans) > 1
             runner = PlanRunner(plan, self._logger, display_filename)
-            num_errors += runner.run()
+            n = runner.run()
+            n_requests += n
+            n_plans.increment(FAIL if n[FAIL] else PASS)
+            n_plans.increment(TOTAL)
 
-        return num_errors
+        elapsed = (datetime.now() - start).total_seconds()
+
+        summary = [
+            ('Plans', n_plans.data),
+            ('Requests', n_requests.data),
+            ('Elapsed', f'{elapsed:.3f} s')
+        ]
+        if n_plans[TOTAL] == 1:
+            summary = summary[1:]
+        self._logger.summary(summary)
+
+        return n_requests[FAIL]
 
 
 class PlanRunner:
@@ -80,7 +127,8 @@ class PlanRunner:
         return path or name
 
     def run(self):
-        num_errors = 0
+        n = ListCounter(3)
+
         repeat_index = 0 if self._has_repeat_condition() else None
 
         break_repeat = False
@@ -98,7 +146,7 @@ class PlanRunner:
             self._logger.start()
 
             for request_dict in self._plan.requests:
-                skip = not ignore_errors and num_errors > 0
+                skip = not ignore_errors and n[FAIL] > 0
 
                 request = Request(request_dict, self._env, skip)
 
@@ -109,15 +157,18 @@ class PlanRunner:
                 self._logger.finish_request(request)
 
                 if not request.state.ok:
-                    num_errors += 1
+                    n.increment(FAIL)
+                elif request.response is not None:
+                    n.increment(PASS)
+                n.increment(TOTAL)
 
             self._logger.close()
 
-            break_repeat = not ignore_errors and num_errors > 0
+            break_repeat = not ignore_errors and n[FAIL] > 0
             repeat_while = (
                 True if repeat_index == 0 else self._check_repeat_condition())
 
             if self._has_repeat_condition():
                 repeat_index += 1
 
-        return num_errors
+        return n.data

@@ -63,3 +63,6 @@ Sending 1 requests:
 
   [1mbase_url[0m: http://localhost:5000
 
+[1mPlans:   [0m [32m[1m3 succeeded[0m, 3 total
+[1mRequests:[0m [32m[1m8 succeeded[0m, 8 total
+[1mElapsed: [0m <DURATION>

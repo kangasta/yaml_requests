@@ -37,3 +37,5 @@ Sending 5 requests:
   < node: default
   < started: '<TIMESTAMP>'
 
+[1mRequests:[0m [32m[1m5 succeeded[0m, 5 total
+[1mElapsed: [0m <DURATION>

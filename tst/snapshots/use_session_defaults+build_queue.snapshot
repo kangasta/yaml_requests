@@ -49,3 +49,6 @@ Sending 5 requests:
   < node: default
   < started: '<TIMESTAMP>'
 
+[1mPlans:   [0m [32m[1m2 succeeded[0m, 2 total
+[1mRequests:[0m [32m[1m6 succeeded[0m, 6 total
+[1mElapsed: [0m <DURATION>
