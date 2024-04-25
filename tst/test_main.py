@@ -7,7 +7,7 @@ from time import sleep
 from unittest import TestCase
 from unittest.mock import patch
 
-from ciou.snapshot import rewind_and_read, snapshot, REPLACE_DURATION, REPLACE_TIMESTAMP, REPLACE_UUID
+from ciou.snapshot import rewind_and_read, snapshot, REPLACE_CWD, REPLACE_DURATION, REPLACE_TIMESTAMP, REPLACE_UUID
 from ciou.types import ensure_list
 
 from yaml_requests import main, run, __version__
@@ -17,7 +17,7 @@ from server.api import start
 from _utils import plan_path
 
 
-REPLACE = [REPLACE_TIMESTAMP, REPLACE_DURATION, REPLACE_UUID]
+REPLACE = [REPLACE_TIMESTAMP, REPLACE_DURATION, REPLACE_UUID, REPLACE_CWD]
 
 NO_PLAN = 251
 INVALID_PLAN = 252

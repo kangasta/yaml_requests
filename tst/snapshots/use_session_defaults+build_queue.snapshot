@@ -1,4 +1,4 @@
-[1m/home/kangasta/github.com/yaml_requests/tst/plans/integration/use_session_defaults.yml[0m
+[1m<CWD>/tst/plans/integration/use_session_defaults.yml[0m
 Sending 1 requests:
 
 [34m> [0m[1mGET[0m http://localhost:5000/                                                                
@@ -10,7 +10,7 @@ Sending 1 requests:
 
   [1mbase_url[0m: http://localhost:5000
 
-[1mSimulate execution of a build from queue (/home/kangasta/github.com/yaml_requests/tst/plans/integration/build_queue.yml)[0m
+[1mSimulate execution of a build from queue (<CWD>/tst/plans/integration/build_queue.yml)[0m
 Sending 5 requests:
 
 [34m> [0m[1mGet queued items[0m                                                                          
