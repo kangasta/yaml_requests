@@ -1,15 +1,14 @@
-from contextlib import redirect_stdout
 from io import StringIO
 from multiprocessing import Process
 import platform
 from requests import get
-import sys
 from time import sleep
 
 from unittest import TestCase
 from unittest.mock import patch
 
 from ciou.snapshot import rewind_and_read, snapshot, REPLACE_DURATION, REPLACE_TIMESTAMP, REPLACE_UUID
+from ciou.types import ensure_list
 
 from yaml_requests import main, run, __version__
 from yaml_requests.logger import RequestLogger
@@ -136,23 +135,25 @@ class IntegrationTest(TestCase):
             'build_queue.yml',
             'repeat_while.yml',
             '', # Run all plans in directory
+            ['use_session_defaults.yml', 'build_queue.yml']
         ]:
+            plans = [plan_path(f'integration/{i}') for i in ensure_list(plan)]
             with self.subTest(plan=plan, function='main'):
                 out.truncate(0)
                 out.seek(0)
 
-                with patch('sys.argv', ['yaml_requests', '--no-animation', plan_path(f'integration/{plan}')]):
+                with patch('sys.argv', ['yaml_requests', '--no-animation', *plans]):
                     code = main()
 
                 if platform.system() != "Windows":
                     actual = rewind_and_read(out)
-                    key = plan.split('.')[0] or 'integration_directory'
+                    key = '+'.join(i.split('.')[0] for i in ensure_list(plan)) or 'integration_directory'
                     self.assertEqual(*snapshot(key, actual, replace=REPLACE))
 
             self.assertEqual(code, 0)
 
             with self.subTest(plan=plan, function='run'):
-                code = run(plan_path(f'integration/{plan}'), RequestLogger())
+                code = run(plans, RequestLogger())
                 self.assertEqual(code, 0)
 
     def test_accessing_request_data(self):

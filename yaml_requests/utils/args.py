@@ -50,7 +50,11 @@ def has_known_extension(path):
 def load_plan_files(paths, in_directory=False):
     plans = []
 
-    for path in ensure_list(paths):
+    paths = ensure_list(paths)
+    if in_directory:
+        paths = sorted(paths)
+
+    for path in paths:
         if os.path.isdir(path):
             plans.extend(load_plan_files((os.path.join(path, i)
                          for i in os.listdir(path)), in_directory=True))

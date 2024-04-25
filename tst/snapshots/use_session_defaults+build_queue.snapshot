@@ -1,3 +1,15 @@
+[1m/home/kangasta/github.com/yaml_requests/tst/plans/integration/use_session_defaults.yml[0m
+Sending 1 requests:
+
+[34m> [0m[1mGET[0m http://localhost:5000/                                                                
+[32m✓ [0m[1mGET[0m http://localhost:5000/                                                                
+  [1mHTTP 200[0m (<DURATION>)
+
+  [32m✓ [0mRequest contains test-header
+  [32m✓ [0mRequest contains test-cookie
+
+  [1mbase_url[0m: http://localhost:5000
+
 [1mSimulate execution of a build from queue (/home/kangasta/github.com/yaml_requests/tst/plans/integration/build_queue.yml)[0m
 Sending 5 requests:
 
@@ -36,30 +48,4 @@ Sending 5 requests:
   < id: <UUID>
   < node: default
   < started: '<TIMESTAMP>'
-
-[1mRepeat example (/home/kangasta/github.com/yaml_requests/tst/plans/integration/repeat_while.yml)[0m
-Sending 1 requests (repeat_index=0):
-
-[34m> [0m[1mGET[0m http://localhost:5000/numbers/count                                                   
-[32m✓ [0m[1mGET[0m http://localhost:5000/numbers/count                                                   
-  [1mHTTP 200[0m (<DURATION>)
-
-[1mRepeat example (/home/kangasta/github.com/yaml_requests/tst/plans/integration/repeat_while.yml)[0m
-Sending 1 requests (repeat_index=1):
-
-[34m> [0m[1mGET[0m http://localhost:5000/numbers/count                                                   
-[32m✓ [0m[1mGET[0m http://localhost:5000/numbers/count                                                   
-  [1mHTTP 200[0m (<DURATION>)
-
-[1m/home/kangasta/github.com/yaml_requests/tst/plans/integration/use_session_defaults.yml[0m
-Sending 1 requests:
-
-[34m> [0m[1mGET[0m http://localhost:5000/                                                                
-[32m✓ [0m[1mGET[0m http://localhost:5000/                                                                
-  [1mHTTP 200[0m (<DURATION>)
-
-  [32m✓ [0mRequest contains test-header
-  [32m✓ [0mRequest contains test-cookie
-
-  [1mbase_url[0m: http://localhost:5000
 
