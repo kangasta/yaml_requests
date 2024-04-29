@@ -7,10 +7,10 @@ from yaml import __version__ as _pyyaml_version
 from requests import __version__ as _requests_version
 
 from . import __version__
-from .utils.args import get_argparser, load_plan_file, parse_variables
+from .utils.args import get_argparser, load_plan_files, parse_variables
 from .logger import ConsoleLogger
 from ._plan import Plan
-from ._runner import PlanRunner
+from ._runner import PlansRunner
 from .error import (
     NoPlanError,
     InterruptedError,
@@ -78,20 +78,21 @@ def execute():
     exit(code)
 
 
-def run(plan_file, logger, variables_override=None):
+def run(plan_path, logger, variables_override=None):
     try:
-        if not plan_file:
+        if not plan_path:
             raise NoPlanError()
 
         try:
-            plan_dict = load_plan_file(plan_file)
-            plan = Plan(plan_dict, variables_override=variables_override)
+            plan_dicts = load_plan_files(plan_path)
+            plans = [Plan(i, variables_override=variables_override)
+                     for i in plan_dicts]
         except FileNotFoundError:
-            raise NoPlanError(plan_file)
+            raise NoPlanError(plan_path)
         except (ValueError, AssertionError,) as error:
             raise InvalidPlanError(str(error))
 
-        runner = PlanRunner(plan, logger)
+        runner = PlansRunner(plans, logger)
         return runner.run()
     except KeyboardInterrupt:
         logger.close()

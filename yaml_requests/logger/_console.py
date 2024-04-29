@@ -1,18 +1,11 @@
-from io import StringIO
 import json
 import sys
 import yaml
 
-from ciou.color import bold, colors, fg_red, fg_hi_black, no_color
+from ciou.color import bold, colors, fg_green, fg_red, fg_hi_black, no_color
 from ciou.progress import Checks, MessageStatus, Progress, OutputConfig, Update
 
 from .._request import RequestState
-
-# From cli-spinners (https://www.npmjs.com/package/cli-spinners)
-INTERVAL = 0.080  # seconds
-FRAMES = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
-
-COLORS = dict(red=31, green=32, yellow=33, blue=34, grey=90)
 
 
 def get_assertion_status(assertion):
@@ -85,6 +78,32 @@ class ConsoleLogger:
         self._print(
             f'{name_text}Sending {num_requests} requests'
             f'{self._repeat_text(repeat_index)}:\n')
+
+    def summary(self, rows):
+        key_width = max(len(i[0]) for i in rows) + 1
+
+        for key, value in rows:
+            if isinstance(value, list):
+                passed, failed, total = value
+                values = []
+
+                if passed:
+                    values.append(
+                        self._style(
+                            f'{passed} succeeded',
+                            bold,
+                            fg_green))
+                if failed:
+                    values.append(
+                        self._style(
+                            f'{failed} failed',
+                            bold,
+                            fg_red))
+
+                values.append(f'{total} total')
+                value = ', '.join(values)
+            self._print(
+                f'{self._style((key + ":").ljust(key_width), bold)} {value}')
 
     def _get_name_text(self, request):
         if request.name:

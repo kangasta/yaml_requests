@@ -1,15 +1,14 @@
-from contextlib import redirect_stdout
 from io import StringIO
 from multiprocessing import Process
 import platform
 from requests import get
-import sys
 from time import sleep
 
 from unittest import TestCase
 from unittest.mock import patch
 
-from ciou.snapshot import rewind_and_read, snapshot, REPLACE_DURATION, REPLACE_TIMESTAMP, REPLACE_UUID
+from ciou.snapshot import rewind_and_read, snapshot, REPLACE_CWD, REPLACE_DURATION, REPLACE_TIMESTAMP, REPLACE_UUID
+from ciou.types import ensure_list
 
 from yaml_requests import main, run, __version__
 from yaml_requests.logger import RequestLogger
@@ -18,7 +17,7 @@ from server.api import start
 from _utils import plan_path
 
 
-REPLACE = [REPLACE_TIMESTAMP, REPLACE_DURATION, REPLACE_UUID]
+REPLACE = [REPLACE_TIMESTAMP, REPLACE_DURATION, REPLACE_UUID, REPLACE_CWD]
 
 NO_PLAN = 251
 INVALID_PLAN = 252
@@ -53,10 +52,10 @@ class MainTest(TestCase):
     def test_main_exit_codes(self, out):
         for key, args, exit_code in [
             ('empty_agrs', [], NO_PLAN),
-            ('file_not_found', ['file_not_found'], NO_PLAN),
+            ('file_not_found', ['file_not_found.yml'], NO_PLAN),
             ('invalid_extension', [plan_path('invalid_extension.py')], INVALID_PLAN),
             ('invalid_plan', [plan_path('invalid_plan.yml')], INVALID_PLAN),
-            ('invalid_variable', [plan_path('build_queue.yml'), '--variable', 'no_value'], INVALID_PLAN),
+            ('invalid_variable', [plan_path('integration/build_queue.yml'), '--variable', 'no_value'], INVALID_PLAN),
         ]:
             with self.subTest(key=key, function='main'):
                 out.truncate(0)
@@ -101,7 +100,7 @@ class MainTest(TestCase):
     @patch('builtins.print')
     @patch('yaml_requests._main.Plan', side_effect=RuntimeError)
     def test_main_unkown_error(self, plan_mock, print_mock):
-        with patch('sys.argv', ['yaml_requests', plan_path('build_queue.yml')]):
+        with patch('sys.argv', ['yaml_requests', plan_path('integration/build_queue.yml')]):
             code = main()
 
         self.assertEqual(code, 254) # Unkown error
@@ -135,23 +134,26 @@ class IntegrationTest(TestCase):
             'use_session_defaults.yml',
             'build_queue.yml',
             'repeat_while.yml',
+            '', # Run all plans in directory
+            ['use_session_defaults.yml', 'build_queue.yml']
         ]:
+            plans = [plan_path(f'integration/{i}') for i in ensure_list(plan)]
             with self.subTest(plan=plan, function='main'):
                 out.truncate(0)
                 out.seek(0)
 
-                with patch('sys.argv', ['yaml_requests', '--no-animation', plan_path(plan)]):
+                with patch('sys.argv', ['yaml_requests', '--no-animation', *plans]):
                     code = main()
 
                 if platform.system() != "Windows":
                     actual = rewind_and_read(out)
-                    key = plan.split('.')[0]
+                    key = '+'.join(i.split('.')[0] for i in ensure_list(plan)) or 'integration_directory'
                     self.assertEqual(*snapshot(key, actual, replace=REPLACE))
 
             self.assertEqual(code, 0)
 
             with self.subTest(plan=plan, function='run'):
-                code = run(plan_path(plan), RequestLogger())
+                code = run(plans, RequestLogger())
                 self.assertEqual(code, 0)
 
     def test_accessing_request_data(self):

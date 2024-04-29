@@ -1,4 +1,4 @@
-[1mSimulate execution of a build from queue[0m
+[1mSimulate execution of a build from queue (<CWD>/tst/plans/integration/build_queue.yml)[0m
 Sending 5 requests:
 
 [34m> [0m[1mGet queued items[0m                                                                          
@@ -37,5 +37,32 @@ Sending 5 requests:
   < node: default
   < started: '<TIMESTAMP>'
 
-[1mRequests:[0m [32m[1m5 succeeded[0m, 5 total
+[1mRepeat example (<CWD>/tst/plans/integration/repeat_while.yml)[0m
+Sending 1 requests (repeat_index=0):
+
+[34m> [0m[1mGET[0m http://localhost:5000/numbers/count                                                   
+[32m✓ [0m[1mGET[0m http://localhost:5000/numbers/count                                                   
+  [1mHTTP 200[0m (<DURATION>)
+
+[1mRepeat example (<CWD>/tst/plans/integration/repeat_while.yml)[0m
+Sending 1 requests (repeat_index=1):
+
+[34m> [0m[1mGET[0m http://localhost:5000/numbers/count                                                   
+[32m✓ [0m[1mGET[0m http://localhost:5000/numbers/count                                                   
+  [1mHTTP 200[0m (<DURATION>)
+
+[1m<CWD>/tst/plans/integration/use_session_defaults.yml[0m
+Sending 1 requests:
+
+[34m> [0m[1mGET[0m http://localhost:5000/                                                                
+[32m✓ [0m[1mGET[0m http://localhost:5000/                                                                
+  [1mHTTP 200[0m (<DURATION>)
+
+  [32m✓ [0mRequest contains test-header
+  [32m✓ [0mRequest contains test-cookie
+
+  [1mbase_url[0m: http://localhost:5000
+
+[1mPlans:   [0m [32m[1m3 succeeded[0m, 3 total
+[1mRequests:[0m [32m[1m8 succeeded[0m, 8 total
 [1mElapsed: [0m <DURATION>

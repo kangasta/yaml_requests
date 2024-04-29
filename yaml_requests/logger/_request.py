@@ -15,6 +15,9 @@ class RequestLogger:
     def title(self, name, num_requests, repeat_index=None):
         pass
 
+    def summary(self, rows):
+        pass
+
     def start_request(self, request):
         self._requests.append(request)
 
