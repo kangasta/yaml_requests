@@ -2,6 +2,9 @@ class RequestLogger:
     def __init__(self):
         self._requests = []
 
+    def copy(self, **kwargs):
+        return RequestLogger()
+
     def start(self):
         pass
 
@@ -13,6 +16,9 @@ class RequestLogger:
         raise error
 
     def title(self, name, num_requests, repeat_index=None):
+        pass
+
+    def push(self, update):
         pass
 
     def summary(self, rows):

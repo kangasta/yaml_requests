@@ -57,7 +57,11 @@ def main():
         return INVALID_PLAN
 
     try:
-        num_errors = run(args.plan_file, logger, variables_override)
+        num_errors = run(
+            args.plan_file,
+            logger,
+            variables_override,
+            args.parallel)
         return min(num_errors, 250)
     except YamlRequestsError as error:
         logger.error(str(error))
@@ -78,7 +82,7 @@ def execute():
     exit(code)
 
 
-def run(plan_path, logger, variables_override=None):
+def run(plan_path, logger, variables_override=None, parallel=None):
     try:
         if not plan_path:
             raise NoPlanError()
@@ -91,8 +95,7 @@ def run(plan_path, logger, variables_override=None):
             raise NoPlanError(plan_path)
         except (ValueError, AssertionError,) as error:
             raise InvalidPlanError(str(error))
-
-        runner = PlansRunner(plans, logger)
+        runner = PlansRunner(plans, logger, parallel)
         return runner.run()
     except KeyboardInterrupt:
         logger.close()

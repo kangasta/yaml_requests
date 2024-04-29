@@ -1,7 +1,12 @@
-from datetime import datetime, timedelta
+from datetime import datetime
+from io import StringIO
+from multiprocessing import cpu_count
+from multiprocessing.pool import ThreadPool
 from requests import request, Session
 from requests.cookies import cookiejar_from_dict
 
+from ciou.color import bold
+from ciou.progress import MessageStatus, Update
 from ciou.types import ensure_list
 
 from .utils.template import Environment
@@ -37,9 +42,11 @@ class ListCounter:
 
 
 class PlansRunner:
-    def __init__(self, plans, logger):
+    def __init__(self, plans, logger, parallel=None):
         self._plans = plans
         self._logger = logger
+        self._parallel = min(len(self._plans),
+                             parallel if parallel else cpu_count())
 
     def run(self):
         n_requests = ListCounter(3)
@@ -47,10 +54,17 @@ class PlansRunner:
 
         start = datetime.now()
 
-        for plan in ensure_list(self._plans):
-            display_filename = len(self._plans) > 1
-            runner = PlanRunner(plan, self._logger, display_filename)
-            n = runner.run()
+        plans = ensure_list(self._plans)
+        if self._parallel == 1:
+            results = map(self._run_single_series, plans)
+        else:
+            self._logger.start()
+            pool = ThreadPool(self._parallel)
+            results = pool.map(self._run_single_parallel, self._plans)
+            pool.close()
+            self._logger.close()
+
+        for n in results:
             n_requests += n
             n_plans.increment(FAIL if n[FAIL] else PASS)
             n_plans.increment(TOTAL)
@@ -68,11 +82,41 @@ class PlansRunner:
 
         return n_requests[FAIL]
 
+    def _run_single_series(self, plan):
+        display_filename = len(self._plans) > 1
+        runner = PlanRunner(plan, self._logger, display_filename)
+        return runner.run()
+
+    def _run_single_parallel(self, plan):
+        out = StringIO()
+        logger = self._logger.copy(target=out, log_started=False)
+        runner = PlanRunner(plan, logger, True, False)
+
+        self._logger.push(Update(
+            key=plan.path,
+            message=bold(runner.title),
+            status=MessageStatus.STARTED,
+        ))
+
+        n = runner.run()
+        status = MessageStatus.ERROR if n[FAIL] else MessageStatus.SUCCESS
+        out.seek(0)
+
+        self._logger.push(Update(
+            key=plan.path,
+            message=bold(runner.title),
+            details=out.read(),
+            status=status,
+        ))
+
+        return n
+
 
 class PlanRunner:
-    def __init__(self, plan, logger, display_filename=False):
+    def __init__(self, plan, logger, display_filename=False, print_name=True):
         self._plan = plan
         self._display_filename = display_filename
+        self._print_name = print_name
 
         self._env = Environment()
         self._prepare_session()
@@ -115,7 +159,7 @@ class PlanRunner:
         return bool(repeat_while)
 
     @property
-    def _title(self):
+    def title(self):
         name = self._plan.name
         if not self._display_filename:
             return name
@@ -139,7 +183,7 @@ class PlanRunner:
         while repeat_while and not break_repeat:
             self._env.register('repeat_index', repeat_index)
             self._logger.title(
-                self._title,
+                self.title if self._print_name else None,
                 len(self._plan.requests),
                 repeat_index=repeat_index)
 

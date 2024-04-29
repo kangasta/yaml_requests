@@ -142,7 +142,7 @@ class IntegrationTest(TestCase):
                 out.truncate(0)
                 out.seek(0)
 
-                with patch('sys.argv', ['yaml_requests', '--no-animation', *plans]):
+                with patch('sys.argv', ['yaml_requests', '--no-animation', '--parallel', '1', *plans]):
                     code = main()
 
                 if platform.system() != "Windows":

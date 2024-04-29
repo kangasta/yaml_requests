@@ -14,6 +14,10 @@ def get_argparser():
         nargs='*',
         help='Load requests plan from JSON or YAML file.')
     parser.add_argument(
+        '--parallel',
+        type=int,
+        help='Limit number of parallel executions.')
+    parser.add_argument(
         '-v', '--variable',
         action='append',
         dest='variables',
