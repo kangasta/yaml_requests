@@ -31,9 +31,16 @@ def _is_printable(pair):
 
 
 class ConsoleLogger:
-    def __init__(self, animations, colors, target=None):
+    def __init__(
+            self,
+            animations=True,
+            colors=True,
+            target=None,
+            log_started=True):
         if not target:
             target = sys.stdout
+
+        self._log_started = log_started
 
         self._output_config = OutputConfig(
             details_color=no_color,
@@ -42,6 +49,14 @@ class ConsoleLogger:
             target=target,
         )
         self._progress = None
+
+    def copy(self, **kwargs):
+        current = dict(
+            animations=(not self._output_config.disable_animation),
+            colors=(not self._output_config.disable_colors),
+            target=self._output_config.target,
+        )
+        return ConsoleLogger(**{**current, **kwargs})
 
     def start(self):
         self._progress = Progress(config=self._output_config)
@@ -78,6 +93,9 @@ class ConsoleLogger:
         self._print(
             f'{name_text}Sending {num_requests} requests'
             f'{self._repeat_text(repeat_index)}:\n')
+
+    def push(self, update):
+        return self._progress.push(update)
 
     def summary(self, rows):
         key_width = max(len(i[0]) for i in rows) + 1
@@ -226,6 +244,9 @@ yml, yaml]', '? ')
         return ''.join(self._response_output_text(request, i) for i in output)
 
     def start_request(self, request):
+        if not self._log_started:
+            return
+
         text = self._get_name_text(request) or self._get_method_text(request)
 
         self._progress.push(Update(
