@@ -1,6 +1,8 @@
 import json
+from os import getenv, path
 
-from jinja2 import Environment as _J2_Environment, StrictUndefined
+from jinja2.nativetypes import NativeEnvironment as _J2_NativeEnvironment
+from jinja2 import StrictUndefined
 
 
 def to_json_filter(value):
@@ -8,8 +10,9 @@ def to_json_filter(value):
     return json.dumps(value)
 
 
-class Environment(_J2_Environment):
+class Environment(_J2_NativeEnvironment):
     def __init__(self, *args, **kwargs):
+        self.path = kwargs.pop('path', None)
         kwargs = {
             'undefined': StrictUndefined,
             **kwargs,
@@ -17,10 +20,41 @@ class Environment(_J2_Environment):
 
         super().__init__(*args, **kwargs)
 
+        self.globals['lookup'] = self.lookup
+        self.globals['open'] = self.open
         self.filters['to_json'] = to_json_filter
 
     def register(self, name, value):
         self.globals[name] = value
+
+    def open(self, src, mode='rb'):
+        paths = [src]
+        if self.path:
+            paths.append(
+                path.join(path.dirname(path.realpath(self.path)), src))
+
+        for i in paths:
+            try:
+                return open(i, mode)
+            except FileNotFoundError:
+                pass
+
+        raise FileNotFoundError(
+            f'File {src} not found from {" or ".join(paths)}')
+
+    def _lookup_file(self, src):
+        f = self.open(src, "r")
+        content = f.read()
+        f.close()
+        return content
+
+    def lookup(self, value, src):
+        if value == 'env':
+            return getenv(src)
+        elif value == 'file':
+            return self._lookup_file(src)
+
+        raise ValueError(f'Unknown lookup source: {value}')
 
     def get(self, name):
         return self.globals.get(name)
@@ -40,24 +74,43 @@ class Environment(_J2_Environment):
         if not self._contains_template(str_in):
             return str_in
 
+        inputs = [str_in]
         if self._is_template(str_in):
             # If input is a template, append to_json filter to maintain
             # original data type. This requires wrapping template expression
             # from user in parentheses to avoid issues with operator
             # predendence.
-            str_in = str_in.replace('{{', '{{ (')
-            str_in = str_in.replace('}}', ') | to_json }}')
+            with_to_json = str_in.replace('{{', '{{ (')
+            with_to_json = with_to_json.replace('}}', ') | to_json }}')
+            inputs = [with_to_json, *inputs]
 
-        template = self.from_string(str_in)
-        rendered = template.render()
-
-        if 'to_json' in str_in:
+        errors = []
+        for i in inputs:
+            template = self.from_string(i)
             try:
-                return json.loads(rendered)
-            except Exception:
-                pass
+                rendered = template.render()
+            except TypeError as e:
+                # If rendering fails, try to render without to_json filter.
+                # This is the case, for example, when using the open filter.
+                errors.append(str(e))
+                continue
 
-        return rendered
+            if 'to_json' in i:
+                try:
+                    loaded = json.loads(rendered)
+                    if isinstance(loaded, dict):
+                        return rendered
+                    return loaded
+                except Exception:
+                    pass
+
+            return rendered
+
+        raise TypeError(
+            'Failed to render template. (' +
+            ', '.join(f'- {e}' for e in errors) +
+            ')'
+        )
 
     def _resolve_dict(self, item) -> dict:
         return {key: self.resolve_templates(value)

@@ -30,6 +30,8 @@ requests:
 In addition to this basic behavior, more advanced features are provided as well:
 
 - All value fields in requests array items support jinja2 templating.
+- Values can be read from environment variables with `lookup` function. For example, `{{ lookup("env", "API_TOKEN") }}`.
+- Files can be read as text with `lookup` function (e.g., `{{ lookup("file", "headers.yaml")}}`) or opened with `open` function (e.g. `{{ open("photos/eiffer-tower.jpg") }}`) to pass in as file objects to `files` parameter of request functions.
 - Variables can be defined in YAML request plan and overridden from commandline arguments.
 - Response of the most recent request is stored in `response` variable as [`requests.Response`](https://docs.python-requests.org/en/latest/api/#requests.Response) object.
 - Responses can be stored as variables with `register` keyword.
