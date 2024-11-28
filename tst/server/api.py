@@ -74,3 +74,19 @@ def numbers_count_route():
     simulate_delay()
     numbers['count'] += 1
     return jsonify(dict(count=numbers.get('count')))
+
+words = list()
+@app.route('/words', methods=['DELETE', 'GET', 'POST'])
+def words_route():
+    simulate_delay()
+    if request.method == 'DELETE':
+        words.clear()
+        return '', 204
+    if request.method == 'POST':
+        word = (request.get_json() or {}).get('word')
+        if not word:
+            return _error('word must be defined')
+
+        words.append(word)
+        return '', 204
+    return jsonify(words)

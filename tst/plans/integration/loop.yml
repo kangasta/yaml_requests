@@ -1,0 +1,30 @@
+name: Use loop to send multiple similar requests
+variables:
+  base_url: http://localhost:5000
+  words:
+  - spades
+  - hearts
+  - diamonds
+  - clubs
+requests:
+- name: Clear words list
+  delete:
+    url: "{{ base_url }}/words"
+- name: Get words
+  get:
+    url: "{{ base_url }}/words"
+  assert:
+  - name: List is empty
+    expression: response.json() | length == 0
+- name: 'Add "{{ item }}" to the words list'
+  post:
+    url: "{{ base_url }}/words"
+    json:
+      word: "{{ item }}"
+  loop: "{{ words }}"
+- name: Get words
+  get:
+    url: "{{ base_url }}/words"
+  assert:
+  - name: List contains all words
+    expression: response.json() == words

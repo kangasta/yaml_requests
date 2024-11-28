@@ -37,6 +37,48 @@ Sending 5 requests:
   < node: default
   < started: '<TIMESTAMP>'
 
+[1mUse loop to send multiple similar requests (<CWD>/tst/plans/integration/loop.yml)[0m
+Sending 4 requests:
+
+[34m> [0m[1mClear words list[0m                                                                          
+[32m✓ [0m[1mClear words list[0m                                                                          
+  [1mDELETE[0m http://localhost:5000/words
+  [1mHTTP 204[0m (<DURATION>)
+
+[34m> [0m[1mGet words[0m                                                                                 
+[32m✓ [0m[1mGet words[0m                                                                                 
+  [1mGET[0m http://localhost:5000/words
+  [1mHTTP 200[0m (<DURATION>)
+
+  [32m✓ [0mList is empty
+
+[34m> [0m[1mAdd "spades" to the words list[0m                                                            
+[32m✓ [0m[1mAdd "spades" to the words list[0m                                                            
+  [1mPOST[0m http://localhost:5000/words
+  [1mHTTP 204[0m (<DURATION>)
+
+[34m> [0m[1mAdd "hearts" to the words list[0m                                                            
+[32m✓ [0m[1mAdd "hearts" to the words list[0m                                                            
+  [1mPOST[0m http://localhost:5000/words
+  [1mHTTP 204[0m (<DURATION>)
+
+[34m> [0m[1mAdd "diamonds" to the words list[0m                                                          
+[32m✓ [0m[1mAdd "diamonds" to the words list[0m                                                          
+  [1mPOST[0m http://localhost:5000/words
+  [1mHTTP 204[0m (<DURATION>)
+
+[34m> [0m[1mAdd "clubs" to the words list[0m                                                             
+[32m✓ [0m[1mAdd "clubs" to the words list[0m                                                             
+  [1mPOST[0m http://localhost:5000/words
+  [1mHTTP 204[0m (<DURATION>)
+
+[34m> [0m[1mGet words[0m                                                                                 
+[32m✓ [0m[1mGet words[0m                                                                                 
+  [1mGET[0m http://localhost:5000/words
+  [1mHTTP 200[0m (<DURATION>)
+
+  [32m✓ [0mList contains all words
+
 [1mRepeat example (<CWD>/tst/plans/integration/repeat_while.yml)[0m
 Sending 1 requests (repeat_index=0):
 
@@ -63,6 +105,6 @@ Sending 1 requests:
 
   [1mbase_url[0m: http://localhost:5000
 
-[1mPlans:   [0m [32m[1m3 succeeded[0m, 3 total
-[1mRequests:[0m [32m[1m8 succeeded[0m, 8 total
+[1mPlans:   [0m [32m[1m4 succeeded[0m, 4 total
+[1mRequests:[0m [32m[1m15 succeeded[0m, 15 total
 [1mElapsed: [0m <DURATION>

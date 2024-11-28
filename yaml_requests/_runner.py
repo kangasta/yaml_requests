@@ -10,7 +10,7 @@ from ciou.progress import MessageStatus, Update
 from ciou.types import ensure_list
 
 from .utils.template import Environment
-from ._request import Request
+from ._request import Request, parse_request
 
 
 PASS = 0
@@ -192,19 +192,19 @@ class PlanRunner:
             for request_dict in self._plan.requests:
                 skip = not ignore_errors and n[FAIL] > 0
 
-                request = Request(request_dict, self._env, skip)
+                requests = parse_request(request_dict, self._env, skip)
+                for request in requests:
+                    if request.state is None:
+                        self._logger.start_request(request)
+                        request.send(self._request)
 
-                if request.state is None:
-                    self._logger.start_request(request)
-                    request.send(self._request)
+                    self._logger.finish_request(request)
 
-                self._logger.finish_request(request)
-
-                if not request.state.ok:
-                    n.increment(FAIL)
-                elif request.response is not None:
-                    n.increment(PASS)
-                n.increment(TOTAL)
+                    if not request.state.ok:
+                        n.increment(FAIL)
+                    elif request.response is not None:
+                        n.increment(PASS)
+                    n.increment(TOTAL)
 
             self._logger.close()
 

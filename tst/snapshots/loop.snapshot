@@ -1,0 +1,44 @@
+[1mUse loop to send multiple similar requests[0m
+Sending 4 requests:
+
+[34m> [0m[1mClear words list[0m                                                                          
+[32m✓ [0m[1mClear words list[0m                                                                          
+  [1mDELETE[0m http://localhost:5000/words
+  [1mHTTP 204[0m (<DURATION>)
+
+[34m> [0m[1mGet words[0m                                                                                 
+[32m✓ [0m[1mGet words[0m                                                                                 
+  [1mGET[0m http://localhost:5000/words
+  [1mHTTP 200[0m (<DURATION>)
+
+  [32m✓ [0mList is empty
+
+[34m> [0m[1mAdd "spades" to the words list[0m                                                            
+[32m✓ [0m[1mAdd "spades" to the words list[0m                                                            
+  [1mPOST[0m http://localhost:5000/words
+  [1mHTTP 204[0m (<DURATION>)
+
+[34m> [0m[1mAdd "hearts" to the words list[0m                                                            
+[32m✓ [0m[1mAdd "hearts" to the words list[0m                                                            
+  [1mPOST[0m http://localhost:5000/words
+  [1mHTTP 204[0m (<DURATION>)
+
+[34m> [0m[1mAdd "diamonds" to the words list[0m                                                          
+[32m✓ [0m[1mAdd "diamonds" to the words list[0m                                                          
+  [1mPOST[0m http://localhost:5000/words
+  [1mHTTP 204[0m (<DURATION>)
+
+[34m> [0m[1mAdd "clubs" to the words list[0m                                                             
+[32m✓ [0m[1mAdd "clubs" to the words list[0m                                                             
+  [1mPOST[0m http://localhost:5000/words
+  [1mHTTP 204[0m (<DURATION>)
+
+[34m> [0m[1mGet words[0m                                                                                 
+[32m✓ [0m[1mGet words[0m                                                                                 
+  [1mGET[0m http://localhost:5000/words
+  [1mHTTP 200[0m (<DURATION>)
+
+  [32m✓ [0mList contains all words
+
+[1mRequests:[0m [32m[1m7 succeeded[0m, 7 total
+[1mElapsed: [0m <DURATION>

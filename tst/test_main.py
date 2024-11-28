@@ -134,6 +134,7 @@ class IntegrationTest(TestCase):
             'use_session_defaults.yml',
             'build_queue.yml',
             'repeat_while.yml',
+            'loop.yml',
             '', # Run all plans in directory
             ['use_session_defaults.yml', 'build_queue.yml']
         ]:
