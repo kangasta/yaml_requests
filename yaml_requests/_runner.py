@@ -10,7 +10,7 @@ from ciou.progress import MessageStatus, Update
 from ciou.types import ensure_list
 
 from .utils.template import Environment
-from ._request import Request, parse_request
+from ._request import parse_request
 
 
 PASS = 0
