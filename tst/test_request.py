@@ -3,7 +3,7 @@ from unittest import TestCase
 from jinja2.exceptions import TemplateError
 
 from yaml_requests.utils.template import Environment
-from yaml_requests._request import Assertion, Request, RequestState
+from yaml_requests._request import Assertion, Request, RequestState, parse_request
 
 from _utils import MockResponse, REQUEST_WITH_ASSERT
 
@@ -38,6 +38,12 @@ REQUEST_WITH_VARIABLE = dict(
     get=dict(url='{{ url }}')
 )
 
+REQUEST_WITH_LOOP = dict(
+    name='Get item',
+    get=dict(url='http://localhost:5000/items/{{ item }}'),
+    loop=[1,2,3]
+)
+
 REQUEST_WITOUT_METHOD = dict(
     name='HTTP method missing'
 )
@@ -49,6 +55,9 @@ class RequestTest(TestCase):
 
         req = Request(REQUEST_WITH_VARIABLE, env)
         self.assertEqual(req.state, RequestState.ERROR)
+
+        req = Request(REQUEST_WITH_VARIABLE, env, context=dict(url='http://localhost:5000'))
+        self.assertIsNone(req.state)
 
         env.register('url','http://localhost:5000')
         req = Request(REQUEST_WITH_VARIABLE, env)
@@ -112,3 +121,11 @@ class RequestTest(TestCase):
         req = Request(REQUEST_WITH_ASSERT, env)
         req.send(MockResponse(True))
         self.assertEqual(req.state, RequestState.FAILURE)
+
+    def test_parse_request(self):
+        env = Environment()
+        requests = parse_request(REQUEST_WITH_LOOP, env)
+        self.assertEqual(len(requests), 3)
+
+        for i, req in enumerate(requests):
+            self.assertEqual(req.params['url'], f'http://localhost:5000/items/{i+1}')

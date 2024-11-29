@@ -70,7 +70,7 @@ class Environment(_J2_NativeEnvironment):
         single_start_eq = str_in.count(self.variable_start_string) == 1
         return start_eq and single_start_eq and end_eq
 
-    def _resolve_string(self, str_in) -> any:
+    def _resolve_string(self, str_in, context=None) -> any:
         if not self._contains_template(str_in):
             return str_in
 
@@ -88,7 +88,7 @@ class Environment(_J2_NativeEnvironment):
         for i in inputs:
             template = self.from_string(i)
             try:
-                rendered = template.render()
+                rendered = template.render(**(context or {}))
             except TypeError as e:
                 # If rendering fails, try to render without to_json filter.
                 # This is the case, for example, when using the open filter.
@@ -112,22 +112,22 @@ class Environment(_J2_NativeEnvironment):
             ')'
         )
 
-    def _resolve_dict(self, item) -> dict:
-        return {key: self.resolve_templates(value)
+    def _resolve_dict(self, item, context) -> dict:
+        return {key: self.resolve_templates(value, context)
                 for key, value in item.items()}
 
-    def _resolve_list(self, item) -> list:
-        return [self.resolve_templates(i) for i in item]
+    def _resolve_list(self, item, context) -> list:
+        return [self.resolve_templates(i, context) for i in item]
 
-    def resolve_templates(self, item) -> any:
+    def resolve_templates(self, item, context=None) -> any:
         if isinstance(item, str):
-            return self._resolve_string(item)
+            return self._resolve_string(item, context)
         elif isinstance(item, list):
-            return self._resolve_list(item)
+            return self._resolve_list(item, context)
         elif isinstance(item, dict):
-            return self._resolve_dict(item)
+            return self._resolve_dict(item, context)
         else:
             return item
 
-    def resolve_expression(self, expr):
-        return self.compile_expression(expr)()
+    def resolve_expression(self, expr, context=None):
+        return self.compile_expression(expr)(**(context or {}))

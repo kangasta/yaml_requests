@@ -50,6 +50,11 @@ class TemplateTest(TestCase):
         value = env.resolve_templates(wrap(' lookup("env", "CITY")'))
         self.assertEqual(value, 'Rovaniemi')
 
+    def test_context(self):
+        env = Environment()
+        value = env.resolve_templates('{{ item }}', dict(item='foo'))
+        self.assertEqual(value, 'foo')
+
     def test_undefined(self):
         env = Environment()
         with self.assertRaises(UndefinedError):

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `loop` option to request to allow sending multiple similar requests by looping over list of values.
+
+### Removed
+
+- Drop Python 3.8 support.
+
 ## [0.13.0]
 
 ### Added

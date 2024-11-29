@@ -74,9 +74,11 @@ class Assertion:
             raise RuntimeError('Assertion has not been executed yet.')
         return self._ok
 
-    def execute(self, template_env):
+    def execute(self, template_env, context=None):
         try:
-            self._ok = bool(template_env.resolve_expression(self.expression))
+            self._ok = bool(
+                template_env.resolve_expression(
+                    self.expression, context))
         except BaseException:
             self._ok = False
             raise
@@ -85,10 +87,11 @@ class Assertion:
 
 
 class Request:
-    def __init__(self, request_dict, template_env, skip=False):
+    def __init__(self, request_dict, template_env, skip=False, context=None):
         self._raw = deepcopy(request_dict)
         self._processed = None
         self._template_env = template_env
+        self._context = context
 
         self.id = f'request-{uuid4()}'
         self.state = None
@@ -115,7 +118,7 @@ class Request:
     def _process_templates(self):
         try:
             self._processed = self._template_env.resolve_templates(
-                self._request)
+                self._request, self._context)
         except TemplateError as error:
             self._set_state(RequestState.ERROR, message=str(error))
 
@@ -163,8 +166,22 @@ class Request:
 
         for assertion in self.assertions:
             try:
-                ok = assertion.execute(self._template_env)
+                ok = assertion.execute(self._template_env, self._context)
                 if not ok:
                     self._set_state(RequestState.FAILURE)
             except BaseException as error:
                 self._set_state(RequestState.ERROR, message=str(error))
+
+
+def parse_request(request_dict, template_env, skip=False) -> list[Request]:
+    raw_loop = request_dict.get('loop')
+    if not raw_loop:
+        return [Request(request_dict, template_env, skip)]
+
+    loop = template_env.resolve_templates(raw_loop)
+    if not isinstance(loop, list):
+        raise AssertionError(
+            f'Expected loop to be a list, got {type(loop).__name__}.')
+
+    return [Request(request_dict, template_env, skip, dict(item=i))
+            for i in loop]

@@ -9,7 +9,7 @@ A simple python app for sending a set of consecutive HTTP requests defined in YA
 
 ## Installing
 
-Ensure that you are using Python >= 3.8 with `python --version`. This app/package is available in [PyPI](https://pypi.org/project/yaml-requests/). To install, run:
+Ensure that you are using Python >= 3.9 with `python --version`. This app/package is available in [PyPI](https://pypi.org/project/yaml-requests/). To install, run:
 
 ```bash
 pip install yaml_requests
@@ -36,7 +36,8 @@ In addition to this basic behavior, more advanced features are provided as well:
 - Response of the most recent request is stored in `response` variable as [`requests.Response`](https://docs.python-requests.org/en/latest/api/#requests.Response) object.
 - Responses can be stored as variables with `register` keyword.
 - Response can be verified with assertions.
-- Plan execution can be repeated by setting `repeate_while` option.
+- Plan execution can be repeated by setting `repeat_while` option.
+- Request can be looped by defining `loop` option for a request. The current item is available in `item` variable.
 
 ## Advanced Example
 
