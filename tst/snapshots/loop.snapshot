@@ -13,23 +13,23 @@ Sending 4 requests:
 
   [32m✓ [0mList is empty
 
-[34m> [0m[1mAdd "spades" to the words list[0m                                                            
-[32m✓ [0m[1mAdd "spades" to the words list[0m                                                            
+[34m> [0m[1mAdd "spades" to the words list[0m (item=spades)                                              
+[32m✓ [0m[1mAdd "spades" to the words list[0m (item=spades)                                              
   [1mPOST[0m http://localhost:5000/words
   [1mHTTP 204[0m (<DURATION>)
 
-[34m> [0m[1mAdd "hearts" to the words list[0m                                                            
-[32m✓ [0m[1mAdd "hearts" to the words list[0m                                                            
+[34m> [0m[1mAdd "hearts" to the words list[0m (item=hearts)                                              
+[32m✓ [0m[1mAdd "hearts" to the words list[0m (item=hearts)                                              
   [1mPOST[0m http://localhost:5000/words
   [1mHTTP 204[0m (<DURATION>)
 
-[34m> [0m[1mAdd "diamonds" to the words list[0m                                                          
-[32m✓ [0m[1mAdd "diamonds" to the words list[0m                                                          
+[34m> [0m[1mAdd "diamonds" to the words list[0m (item=diamonds)                                          
+[32m✓ [0m[1mAdd "diamonds" to the words list[0m (item=diamonds)                                          
   [1mPOST[0m http://localhost:5000/words
   [1mHTTP 204[0m (<DURATION>)
 
-[34m> [0m[1mAdd "clubs" to the words list[0m                                                             
-[32m✓ [0m[1mAdd "clubs" to the words list[0m                                                             
+[34m> [0m[1mAdd "clubs" to the words list[0m (item=clubs)                                                
+[32m✓ [0m[1mAdd "clubs" to the words list[0m (item=clubs)                                                
   [1mPOST[0m http://localhost:5000/words
   [1mHTTP 204[0m (<DURATION>)
 

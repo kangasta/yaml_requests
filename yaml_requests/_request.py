@@ -99,7 +99,7 @@ class Request:
         self._raw = deepcopy(request_dict)
         self._processed = None
         self._template_env = template_env
-        self._context = context
+        self.context = context
 
         self.id = f'request-{uuid4()}'
         self.state = None
@@ -126,7 +126,7 @@ class Request:
     def _process_templates(self):
         try:
             self._processed = self._template_env.resolve_templates(
-                self._request, self._context)
+                self._request, self.context)
         except TemplateError as error:
             self._set_state(RequestState.ERROR, message=str(error))
 
@@ -174,7 +174,7 @@ class Request:
 
         for assertion in self.assertions:
             try:
-                ok = assertion.execute(self._template_env, self._context)
+                ok = assertion.execute(self._template_env, self.context)
                 if not ok:
                     self._set_state(RequestState.FAILURE)
             except BaseException as error:

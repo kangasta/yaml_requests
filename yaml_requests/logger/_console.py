@@ -249,6 +249,13 @@ yml, yaml]', '? ')
 
         return ''.join(self._response_output_text(request, i) for i in output)
 
+    def _with_context(self, message, context):
+        if not context:
+            return message
+
+        items = (f'{key}={value}' for key, value in context.items())
+        return f'{message} ({", ".join(items)})'
+
     def start_request(self, request):
         if not self._log_started:
             return
@@ -257,7 +264,7 @@ yml, yaml]', '? ')
 
         self._progress.push(Update(
             key=request.id,
-            message=text,
+            message=self._with_context(text, request.context),
             status=MessageStatus.STARTED,
         ))
 
@@ -278,7 +285,7 @@ yml, yaml]', '? ')
 
         self._progress.push(Update(
             key=request.id,
-            message=message,
+            message=self._with_context(message, request.context),
             details=details,
             status=get_status(request.state)
         ))
