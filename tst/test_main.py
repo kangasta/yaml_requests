@@ -57,6 +57,9 @@ class MainTest(TestCase):
             ('invalid_plan', [plan_path('invalid_plan.yml')], INVALID_PLAN),
             ('invalid_variable', [plan_path('integration/build_queue.yml'), '--variable', 'no_value'], INVALID_PLAN),
             ('failing_loop.yml', [plan_path('failing_loop.yml')], 1),
+            ('variable_file_as_arg', [plan_path('integration/loop.yml'), plan_path('integration/loop_vars.yml')], INVALID_PLAN),
+            ('invalid_variable_file.yml', [plan_path('invalid_variable_file.yml')], INVALID_PLAN),
+            ('variable_file_not_found.yml', [plan_path('variable_file_not_found.yml')], INVALID_PLAN),
         ]:
             with self.subTest(key=key, function='main'):
                 out.truncate(0)
@@ -65,11 +68,12 @@ class MainTest(TestCase):
                 with patch('sys.argv', ['yaml_requests', *args]):
                     code = main()
 
+                actual = None
                 if platform.system() != "Windows":
                     actual = rewind_and_read(out)
                     self.assertEqual(*snapshot(key, actual, replace=REPLACE))
 
-                self.assertEqual(code, exit_code)
+                self.assertEqual(code, exit_code, f'Output:\n{actual}')
 
     @patch('builtins.print')
     def test_main_minimal(self, print_mock):
@@ -99,8 +103,8 @@ class MainTest(TestCase):
         self.assertEqual(code, 3)
 
     @patch('builtins.print')
-    @patch('yaml_requests._main.Plan', side_effect=RuntimeError)
-    def test_main_unkown_error(self, plan_mock, print_mock):
+    @patch('yaml_requests._main.build_plans', side_effect=RuntimeError)
+    def test_main_unknown_error(self, plan_mock, print_mock):
         with patch('sys.argv', ['yaml_requests', plan_path('integration/build_queue.yml')]):
             code = main()
 
@@ -152,7 +156,7 @@ class IntegrationTest(TestCase):
                     key = '+'.join(i.split('.')[0] for i in ensure_list(plan)) or 'integration_directory'
                     self.assertEqual(*snapshot(key, actual, replace=REPLACE))
 
-            self.assertEqual(code, 0)
+                self.assertEqual(code, 0)
 
             with self.subTest(plan=plan, function='run'):
                 code = run(plans, RequestLogger())

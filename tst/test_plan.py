@@ -16,22 +16,24 @@ class PlanTest(TestCase):
 
     def test_parse_valid_plan(self):
         for plan_file in ['minimal_plan.yml', 'full_plan.yml']:
-            plan_dict = load_plan_file(plan_path(plan_file))
-            Plan(plan_dict)
+            with self.subTest(plan=plan_file):
+                plan_dict = load_plan_file(plan_path(plan_file))
+                Plan(plan_dict)
 
     def test_parse_plan_overrides(self):
         options_override = dict(session=False)
-        variables_override = dict(hostname='github.com')
+        variables_override = dict(hostname='github.com', name='test')
 
         for plan_file in ['minimal_plan.yml', 'full_plan.yml']:
-            plan_dict = load_plan_file(plan_path(plan_file))
-            plan = Plan(
-                plan_dict,
-                options_override=options_override,
-                variables_override=variables_override)
+            with self.subTest(plan=plan_file):
+                plan_dict = load_plan_file(plan_path(plan_file))
+                plan = Plan(
+                    plan_dict,
+                    options_override=options_override,
+                    variables_override=variables_override)
 
-            self.assertEqual(options_override.get('session'), plan.options.session)
-            self.assertDictEqual(variables_override, plan.variables)
+                self.assertEqual(options_override.get('session'), plan.options.session)
+                self.assertDictEqual(variables_override, plan.variables)
 
     def test_parse_session_options(self):
         plan_dict = load_plan_file(plan_path('integration/use_session_defaults.yml'))

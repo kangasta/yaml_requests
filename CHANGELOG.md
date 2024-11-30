@@ -7,9 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `variable_files` plan keyword for reading variables from JSON or YAML file.
+
 ### Fixed
 
 - If a request in a loop fails, skip following requests unless `ignore_errors` is truthy.
+- If parsing plan fails, print error or skipped message for each resolved plan argument.
 
 ## [0.15.0]
 

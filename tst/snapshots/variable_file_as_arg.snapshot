@@ -1,0 +1,6 @@
+[1m<CWD>/tst/plans/integration/loop_vars.yml[0m
+[31m[1mERROR:[0m Plan must contain requests array.
+
+[1mUse loop to send multiple similar requests (<CWD>/tst/plans/integration/loop.yml)[0m
+[35m[1mSKIPPED:[0m Plan skipped because parsing one or more plans failed.
+

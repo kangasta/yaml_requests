@@ -68,20 +68,25 @@ def load_plan_files(paths, in_directory=False):
     return plans
 
 
-def load_plan_file(filename):
+def load_json_or_yaml_file(filename):
     if not filename:
         raise ValueError('No input file given.')
 
     with open(filename, 'r') as f:
         if filename.endswith('.json'):
-            plan = json.load(f)
+            data = json.load(f)
         elif filename.endswith('.yaml') or filename.endswith('.yml'):
-            plan = yaml.load(f, Loader=yaml.SafeLoader)
+            data = yaml.load(f, Loader=yaml.SafeLoader)
         else:
             raise ValueError(
                 'Failed to recognize file type. '
                 'File extension must be json, yaml, or yml.')
 
+    return data
+
+
+def load_plan_file(filename):
+    plan = load_json_or_yaml_file(filename)
     plan['path'] = filename
     return plan
 

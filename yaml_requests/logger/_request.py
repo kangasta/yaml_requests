@@ -32,3 +32,6 @@ class RequestLogger:
 
     def finish_request(self, request):
         self._requests[-1] = request
+
+    def skipped_plan(self, plans, invalid_plans):
+        pass

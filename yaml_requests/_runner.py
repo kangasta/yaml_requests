@@ -161,15 +161,7 @@ class PlanRunner:
 
     @property
     def title(self):
-        name = self._plan.name
-        if not self._display_filename:
-            return name
-
-        path = self._plan.path
-        if name and path:
-            return f'{name} ({path})'
-
-        return path or name
+        return self._plan.title(self._display_filename)
 
     def run(self):
         n = ListCounter(3)

@@ -1,0 +1,5 @@
+variable_files:
+- not-found.yml
+requests:
+- get:
+    url: "https://google.com"
