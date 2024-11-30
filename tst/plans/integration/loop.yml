@@ -1,11 +1,8 @@
 name: Use loop to send multiple similar requests
 variables:
   base_url: http://localhost:5000
-  words:
-  - spades
-  - hearts
-  - diamonds
-  - clubs
+variable_files:
+- loop_vars.yml
 requests:
 - name: Clear words list
   delete:

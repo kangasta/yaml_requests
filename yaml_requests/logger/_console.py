@@ -75,13 +75,19 @@ class ConsoleLogger:
         if self._progress:
             self._progress.stop()
 
-    def error(self, error):
-        text = str(error)
-        if not text:
+    def _status(self, status: MessageStatus, message: str):
+        if not message:
             return
 
-        error_text = self._style('ERROR:', bold, fg_red)
-        self._print(f'{error_text} {text}')
+        error_text = self._style(
+            f'{status.value.upper()}:',
+            bold,
+            self._output_config.get_status_color(status)
+        )
+        self._print(f'{error_text} {message}')
+
+    def error(self, error):
+        return self._status(MessageStatus.ERROR, str(error))
 
     def _repeat_text(self, repeat_index):
         if repeat_index is None:
@@ -276,3 +282,20 @@ yml, yaml]', '? ')
             details=details,
             status=get_status(request.state)
         ))
+
+    def skipped_plan(self, plans, invalid_plans):
+        multiple_plans = (len(plans) + len(invalid_plans)) > 1
+
+        for invalid_plan in invalid_plans:
+            if multiple_plans:
+                self._print(self._style(invalid_plan.path, bold))
+            self.error(invalid_plan.error)
+            if multiple_plans:
+                self._print()
+
+        for plan in plans:
+            self._print(self._style(plan.title(multiple_plans), bold))
+            self._status(
+                MessageStatus.SKIPPED,
+                'Plan skipped because parsing one or more plans failed.')
+            self._print()

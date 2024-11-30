@@ -9,7 +9,7 @@ from requests import __version__ as _requests_version
 from . import __version__
 from .utils.args import get_argparser, load_plan_files, parse_variables
 from .logger import ConsoleLogger
-from ._plan import Plan
+from ._plan import build_plans
 from ._runner import PlansRunner
 from .error import (
     NoPlanError,
@@ -89,12 +89,17 @@ def run(plan_path, logger, variables_override=None, parallel=None):
 
         try:
             plan_dicts = load_plan_files(plan_path)
-            plans = [Plan(i, variables_override=variables_override)
-                     for i in plan_dicts]
+            plans, invalid_plans = build_plans(
+                plan_dicts, plan_path, variables_override)
         except FileNotFoundError:
             raise NoPlanError(plan_path)
         except (ValueError, AssertionError,) as error:
             raise InvalidPlanError(str(error))
+
+        if invalid_plans:
+            logger.skipped_plan(plans, invalid_plans)
+            raise InvalidPlanError('')
+
         runner = PlansRunner(plans, logger, parallel)
         return runner.run()
     except KeyboardInterrupt:

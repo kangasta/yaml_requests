@@ -1,0 +1,1 @@
+[31m[1mERROR:[0m Failed to load variable file <CWD>/tst/plans/list.yml: The top level data-type in variable file must be an object.

@@ -31,6 +31,11 @@ class InvalidPlanError(YamlRequestsError):
         super().__init__(message, INVALID_PLAN)
 
 
+class LoadingPlanDependencyFailedError(InvalidPlanError):
+    def __init__(self, message):
+        super().__init__(message)
+
+
 class InterruptedError(YamlRequestsError):
     def __init__(self):
         super().__init__('', INTERRUPTED)

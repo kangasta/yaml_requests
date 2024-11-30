@@ -3,6 +3,8 @@ options:
   session: yes
 variables:
   hostname: google.com
+variable_files:
+- vars.yml
 requests:
 - name: "Load {{ hostname }}"
   get:

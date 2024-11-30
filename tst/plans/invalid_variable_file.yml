@@ -1,0 +1,5 @@
+variable_files:
+- list.yml
+requests:
+- get:
+    url: "https://google.com"
