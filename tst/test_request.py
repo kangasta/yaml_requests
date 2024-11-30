@@ -3,7 +3,7 @@ from unittest import TestCase
 from jinja2.exceptions import TemplateError
 
 from yaml_requests.utils.template import Environment
-from yaml_requests._request import Assertion, Request, RequestState, parse_request
+from yaml_requests._request import Assertion, Request, RequestState, parse_request_loop
 
 from _utils import MockResponse, REQUEST_WITH_ASSERT
 
@@ -122,10 +122,12 @@ class RequestTest(TestCase):
         req.send(MockResponse(True))
         self.assertEqual(req.state, RequestState.FAILURE)
 
-    def test_parse_request(self):
+    def test_parse_request_loop(self):
         env = Environment()
-        requests = parse_request(REQUEST_WITH_LOOP, env)
-        self.assertEqual(len(requests), 3)
+        args_loop = parse_request_loop(REQUEST_WITH_LOOP, env)
+        self.assertEqual(len(args_loop), 3)
 
-        for i, req in enumerate(requests):
+        for i, args in enumerate(args_loop):
+            request_dict, template_env, context = args
+            req = Request(request_dict, template_env, False, context)
             self.assertEqual(req.params['url'], f'http://localhost:5000/items/{i+1}')

@@ -1,0 +1,15 @@
+Sending 1 requests:
+
+[34m> [0m[1mGET[0m invalid url                                                                           
+[31m✗ [0m[1mGET[0m invalid url                                                                           
+  [1mERROR:[0m Invalid URL 'invalid url': No scheme supplied. Perhaps you meant https://invalid
+  url?
+
+[35m- [0m[1mGET[0m invalid url                                                                           
+  [1mSKIPPED:[0m Request skipped due to earlier error.
+
+[35m- [0m[1mGET[0m invalid url                                                                           
+  [1mSKIPPED:[0m Request skipped due to earlier error.
+
+[1mRequests:[0m [31m[1m1 failed[0m, 3 total
+[1mElapsed: [0m <DURATION>
