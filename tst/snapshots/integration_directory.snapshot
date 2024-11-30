@@ -86,13 +86,6 @@ Sending 1 requests (repeat_index=0):
 [32m✓ [0m[1mGET[0m http://localhost:5000/numbers/count                                                   
   [1mHTTP 200[0m (<DURATION>)
 
-[1mRepeat example (<CWD>/tst/plans/integration/repeat_while.yml)[0m
-Sending 1 requests (repeat_index=1):
-
-[34m> [0m[1mGET[0m http://localhost:5000/numbers/count                                                   
-[32m✓ [0m[1mGET[0m http://localhost:5000/numbers/count                                                   
-  [1mHTTP 200[0m (<DURATION>)
-
 [1m<CWD>/tst/plans/integration/use_session_defaults.yml[0m
 Sending 1 requests:
 
@@ -106,5 +99,5 @@ Sending 1 requests:
   [1mbase_url[0m: http://localhost:5000
 
 [1mPlans:   [0m [32m[1m4 succeeded[0m, 4 total
-[1mRequests:[0m [32m[1m15 succeeded[0m, 15 total
+[1mRequests:[0m [32m[1m14 succeeded[0m, 14 total
 [1mElapsed: [0m <DURATION>
