@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `variable_files` plan keyword for reading variables from JSON or YAML file.
+- Print requests context to the console.
 
 ### Fixed
 
