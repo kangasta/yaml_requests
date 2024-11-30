@@ -37,7 +37,7 @@ class TemplateTest(TestCase):
         f.read()
         f.close()
 
-    def test_lookup(self):
+    def test_lookup_file(self):
         env = Environment(path=__file__)
 
         content = env.resolve_templates(wrap(f' lookup("file", "{TST_DIR}/file_lookup_test_data.txt")'))
@@ -46,9 +46,16 @@ class TemplateTest(TestCase):
         content = env.resolve_templates(wrap(f' lookup("file", "file_lookup_test_data.txt")'))
         self.assertEqual(content, "Thu Nov 28 00:05:47 EET 2024")
 
+    def test_lookup_env(self):
+        env = Environment(path=__file__)
+
         os.environ['CITY'] = 'Rovaniemi'
         value = env.resolve_templates(wrap(' lookup("env", "CITY")'))
         self.assertEqual(value, 'Rovaniemi')
+
+        value = env.resolve_templates(wrap(' lookup("env", "COUNTRY")'))
+        self.assertEqual(value, None)
+
 
     def test_context(self):
         env = Environment()

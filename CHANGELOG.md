@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `repeat_delay` option to plan for configuring a delay to wait before repeating the plan execution.
+
+### Fixed
+
+- If `repeat_while` condition is falsy after initial execution, do not repeat the plan.
+
 ## [0.14.0]
 
 ### Added

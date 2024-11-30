@@ -4,6 +4,7 @@ from multiprocessing import cpu_count
 from multiprocessing.pool import ThreadPool
 from requests import request, Session
 from requests.cookies import cookiejar_from_dict
+from time import sleep
 
 from ciou.color import bold
 from ciou.progress import MessageStatus, Update
@@ -175,12 +176,15 @@ class PlanRunner:
 
         repeat_index = 0 if self._has_repeat_condition() else None
 
-        break_repeat = False
         repeat_while = True
 
         ignore_errors = self._plan.options.ignore_errors
 
-        while repeat_while and not break_repeat:
+        while repeat_while:
+            if repeat_index:
+                if self._plan.options.repeat_delay:
+                    sleep(self._plan.options.repeat_delay)
+
             self._env.register('repeat_index', repeat_index)
             self._logger.title(
                 self.title if self._print_name else None,
@@ -208,9 +212,10 @@ class PlanRunner:
 
             self._logger.close()
 
-            break_repeat = not ignore_errors and n[FAIL] > 0
-            repeat_while = (
-                True if repeat_index == 0 else self._check_repeat_condition())
+            if not ignore_errors and n[FAIL] > 0:
+                break
+
+            repeat_while = self._check_repeat_condition()
 
             if self._has_repeat_condition():
                 repeat_index += 1
