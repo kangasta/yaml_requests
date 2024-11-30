@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- If a request in a loop fails, skip following requests unless `ignore_errors` is truthy.
+
 ## [0.15.0]
 
 ### Added

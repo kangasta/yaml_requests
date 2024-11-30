@@ -56,6 +56,7 @@ class MainTest(TestCase):
             ('invalid_extension', [plan_path('invalid_extension.py')], INVALID_PLAN),
             ('invalid_plan', [plan_path('invalid_plan.yml')], INVALID_PLAN),
             ('invalid_variable', [plan_path('integration/build_queue.yml'), '--variable', 'no_value'], INVALID_PLAN),
+            ('failing_loop.yml', [plan_path('failing_loop.yml')], 1),
         ]:
             with self.subTest(key=key, function='main'):
                 out.truncate(0)
@@ -68,7 +69,7 @@ class MainTest(TestCase):
                     actual = rewind_and_read(out)
                     self.assertEqual(*snapshot(key, actual, replace=REPLACE))
 
-            self.assertEqual(code, exit_code)
+                self.assertEqual(code, exit_code)
 
     @patch('builtins.print')
     def test_main_minimal(self, print_mock):

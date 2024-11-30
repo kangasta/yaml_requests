@@ -3,6 +3,9 @@ from jinja2.exceptions import TemplateError
 from requests.exceptions import RequestException
 from uuid import uuid4
 
+from .utils.template import Environment
+
+
 METHODS = ('GET', 'OPTIONS', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE',)
 EARLIER_ERRORS_SKIP = 'Request skipped due to earlier error.'
 NO_HTTP_METHOD = (
@@ -87,7 +90,12 @@ class Assertion:
 
 
 class Request:
-    def __init__(self, request_dict, template_env, skip=False, context=None):
+    def __init__(
+            self,
+            request_dict: dict,
+            template_env: Environment,
+            skip=False,
+            context: dict = None):
         self._raw = deepcopy(request_dict)
         self._processed = None
         self._template_env = template_env
@@ -173,15 +181,18 @@ class Request:
                 self._set_state(RequestState.ERROR, message=str(error))
 
 
-def parse_request(request_dict, template_env, skip=False) -> list[Request]:
+def parse_request_loop(request_dict: dict,
+                       template_env: Environment) -> list[tuple[dict,
+                                                                Environment,
+                                                                dict]]:
     raw_loop = request_dict.get('loop')
     if not raw_loop:
-        return [Request(request_dict, template_env, skip)]
+        return [(request_dict, template_env, None,)]
 
     loop = template_env.resolve_templates(raw_loop)
     if not isinstance(loop, list):
         raise AssertionError(
             f'Expected loop to be a list, got {type(loop).__name__}.')
 
-    return [Request(request_dict, template_env, skip, dict(item=i))
+    return [(request_dict, template_env, dict(item=i),)
             for i in loop]

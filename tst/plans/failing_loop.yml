@@ -1,0 +1,4 @@
+requests:
+- get:
+    url: invalid url
+  loop: [1, 2, 3]
