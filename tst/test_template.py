@@ -1,3 +1,4 @@
+import json
 import os
 import yaml
 
@@ -8,7 +9,7 @@ from unittest import TestCase
 from yaml_requests.utils.template import Environment
 
 TST_DIR = os.path.dirname(os.path.realpath(__file__))
-with open(f'{TST_DIR}/template_test_data.yml', 'r') as f:
+with open(os.path.join(TST_DIR, 'template_test_data.yml'), 'r') as f:
     TEST_DATA = yaml.load(f, Loader=yaml.SafeLoader)
 
 
@@ -32,15 +33,16 @@ class TemplateTest(TestCase):
 
     def test_open(self):
         env = Environment()
-        f = env.resolve_templates(wrap(f' open("{TST_DIR}/test_template.py") '))
-        print(f"***** {f}")
+        path = json.dumps(os.path.join(TST_DIR, "test_template.py"))
+        f = env.resolve_templates(wrap(f' open({path}) '))
         f.read()
         f.close()
 
     def test_lookup_file(self):
         env = Environment(path=__file__)
 
-        content = env.resolve_templates(wrap(f' lookup("file", "{TST_DIR}/file_lookup_test_data.txt")'))
+        path = json.dumps(os.path.join(TST_DIR, "file_lookup_test_data.txt"))
+        content = env.resolve_templates(wrap(f' lookup("file", {path})'))
         self.assertEqual(content, "Thu Nov 28 00:05:47 EET 2024")
 
         content = env.resolve_templates(wrap(f' lookup("file", "file_lookup_test_data.txt")'))

@@ -1,5 +1,6 @@
 import json
 from os import getenv, path
+from pathlib import Path
 
 from jinja2.exceptions import TemplateError
 from jinja2.nativetypes import NativeEnvironment as _J2_NativeEnvironment
@@ -37,7 +38,7 @@ class Environment(_J2_NativeEnvironment):
         paths = [src]
         if self.path:
             paths.append(
-                path.join(path.dirname(path.realpath(self.path)), src))
+                path.join(path.dirname(path.realpath(self.path)), Path(src)))
 
         for i in paths:
             try:

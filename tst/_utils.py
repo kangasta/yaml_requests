@@ -53,4 +53,4 @@ def get_sent_mock_request(request_dict=None, template_env=None, ok=True, content
     return req
 
 def plan_path(plan_name):
-    return f'{TST_DIR}/plans/{plan_name}'
+    return os.path.join(TST_DIR, 'plans', plan_name)
