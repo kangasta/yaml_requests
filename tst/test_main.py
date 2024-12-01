@@ -71,9 +71,8 @@ class MainTest(TestCase):
                 with patch('sys.argv', ['yaml_requests', *args]):
                     code = main()
 
-                actual = None
+                actual = rewind_and_read(out)
                 if platform.system() != "Windows":
-                    actual = rewind_and_read(out)
                     self.assertEqual(*snapshot(key, actual, replace=REPLACE))
 
                 self.assertEqual(code, exit_code, f'Output:\n{actual}')
@@ -154,12 +153,12 @@ class IntegrationTest(TestCase):
                 with patch('sys.argv', ['yaml_requests', '--no-animation', '--parallel', '1', *plans]):
                     code = main()
 
+                actual = rewind_and_read(out)
                 if platform.system() != "Windows":
-                    actual = rewind_and_read(out)
                     key = '+'.join(i.split('.')[0] for i in ensure_list(plan)) or 'integration_directory'
                     self.assertEqual(*snapshot(key, actual, replace=REPLACE))
 
-                self.assertEqual(code, 0)
+                self.assertEqual(code, 0, f'Output:\n{actual}')
 
             with self.subTest(plan=plan, function='run'):
                 code = run(plans, RequestLogger())

@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Handle file-not-found errors from `lookup` and `open` template functions. Error message is displayed without stack trace similarly than `variable_files` related errors.
+- On Windows systems, convert UNIX style paths defined as a parameter for `lookup`, `open` or `variable_files` to Windows style paths.
 
 ## [0.16.0]
 

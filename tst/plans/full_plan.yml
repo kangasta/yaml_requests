@@ -4,7 +4,7 @@ options:
 variables:
   hostname: google.com
 variable_files:
-- vars.yml
+- variables/name.yml
 requests:
 - name: "Load {{ hostname }}"
   get:

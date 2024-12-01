@@ -1,5 +1,6 @@
 from copy import deepcopy
 from os import path
+from pathlib import Path
 
 from ciou.types import ensure_list
 
@@ -36,7 +37,7 @@ def _resolve_variable_files(variable_files, plan_path=None):
 
         if plan_path:
             plan_relative = path.join(
-                path.dirname(path.realpath(plan_path)), f)
+                path.dirname(path.realpath(plan_path)), Path(f))
             paths.append(plan_relative)
             if path.isfile(plan_relative):
                 resolved.append(plan_relative)
@@ -113,10 +114,9 @@ class InvalidPlan:
         self.error = error
 
 
-def build_plans(plan_dicts,
-                paths,
-                variables_override) -> tuple[list[Plan],
-                                             list[InvalidPlan]]:
+def build_plans(
+    plan_dicts, paths, variables_override
+) -> tuple[list[Plan], list[InvalidPlan]]:
     plans = []
     invalid_plans = {}
 
