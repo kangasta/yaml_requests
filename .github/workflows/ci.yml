@@ -31,12 +31,19 @@ jobs:
       run: |
         pip install -r requirements.txt
         yaml_requests --version
-    - name: Run static analysis and unittests
+    - name: Run static analysis
       run: |
         pycodestyle yaml_requests
         pylint -E --enable=invalid-name,unused-import,useless-object-inheritance yaml_requests
+    - name: Run unittests with coverage
+      run: |
         coverage run --branch --source yaml_requests/ -m unittest discover -s tst/
         coverage report -m
+      if: matrix.os != 'windows-latest'
+    - name: Run unittests
+      run: |
+        python3 -m unittest discover -s tst/
+      if: matrix.os == 'windows-latest'
     - name: Push coverage
       uses: paambaati/codeclimate-action@v2.7.5
       with:
