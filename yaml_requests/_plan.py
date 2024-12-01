@@ -123,7 +123,7 @@ def build_plans(
     paths = ensure_list(paths)
 
     for plan_dict in plan_dicts:
-        path = plan_dict['path']
+        plan_path = plan_dict['path']
 
         try:
             plans.append(
@@ -131,8 +131,8 @@ def build_plans(
                     plan_dict,
                     variables_override=variables_override))
         except (ValueError, AssertionError,) as error:
-            invalid_plans[path] = InvalidPlan(
-                path,
+            invalid_plans[path.realpath(plan_path)] = InvalidPlan(
+                plan_path,
                 plan_dict,
                 InvalidPlanError(str(error))
             )
@@ -140,10 +140,12 @@ def build_plans(
     # Ignore InvalidPlanError if the plan that caused it is a variable file
     # used by other plan unless the file was explicitly defined by the user.
     if invalid_plans:
+        abs_paths = [path.realpath(i) for i in paths]
         for plan in plans:
             for variable_file in plan.variable_files:
-                if (variable_file not in paths and
-                        variable_file in invalid_plans):
-                    invalid_plans.pop(variable_file)
+                abs_variable_file = path.realpath(variable_file)
+                if (abs_variable_file not in abs_paths and
+                        abs_variable_file in invalid_plans):
+                    invalid_plans.pop(abs_variable_file)
 
     return plans, list(invalid_plans.values())

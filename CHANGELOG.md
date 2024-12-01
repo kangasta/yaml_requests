@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Handle file-not-found errors from `lookup` and `open` template functions. Error message is displayed without stack trace similarly than `variable_files` related errors.
 - On Windows systems, convert UNIX style paths defined as a parameter for `lookup`, `open` or `variable_files` to Windows style paths.
+- Ignore `InvalidPlan` errors for files that are variable files of other plans when using directory as `plan_file` positional argument also on Windows systems.
 
 ## [0.16.0]
 
