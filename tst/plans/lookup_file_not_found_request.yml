@@ -1,0 +1,6 @@
+requests:
+- post:
+    url: http://localhost:5000/upload
+    files:
+      json:
+        animal: "{{ lookup('file', 'animal.txt') }}"

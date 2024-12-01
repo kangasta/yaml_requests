@@ -1,8 +1,14 @@
 import json
 from os import getenv, path
 
+from jinja2.exceptions import TemplateError
 from jinja2.nativetypes import NativeEnvironment as _J2_NativeEnvironment
 from jinja2 import StrictUndefined
+
+
+class TemplateDependencyError(TemplateError):
+    def __init__(self, message):
+        super().__init__(message)
 
 
 def to_json_filter(value):
@@ -39,7 +45,7 @@ class Environment(_J2_NativeEnvironment):
             except FileNotFoundError:
                 pass
 
-        raise FileNotFoundError(
+        raise TemplateDependencyError(
             f'File {src} not found from {" or ".join(paths)}')
 
     def _lookup_file(self, src):

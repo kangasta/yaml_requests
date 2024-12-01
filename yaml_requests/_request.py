@@ -128,7 +128,8 @@ class Request:
             self._processed = self._template_env.resolve_templates(
                 self._request, self.context)
         except TemplateError as error:
-            self._set_state(RequestState.ERROR, message=str(error))
+            message = f'Failed to resolve templates: {str(error)}'
+            self._set_state(RequestState.ERROR, message=message)
 
     def _parse_method_and_params(self):
         method_keys = [

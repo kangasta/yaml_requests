@@ -1,0 +1,5 @@
+requests:
+- post:
+    url: http://localhost:5000/upload
+    files:
+      photo: "{{ open('tst/data/photo.jpg', 'rb') }}"

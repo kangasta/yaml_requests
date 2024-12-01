@@ -60,6 +60,9 @@ class MainTest(TestCase):
             ('variable_file_as_arg', [plan_path('integration/loop.yml'), plan_path('integration/loop_vars.yml')], INVALID_PLAN),
             ('invalid_variable_file.yml', [plan_path('invalid_variable_file.yml')], INVALID_PLAN),
             ('variable_file_not_found.yml', [plan_path('variable_file_not_found.yml')], INVALID_PLAN),
+            ('lookup_file_not_found_request.yml', [plan_path('lookup_file_not_found_request.yml')], 1),
+            ('lookup_file_not_found_variables.yml', [plan_path('lookup_file_not_found_variables.yml')], INVALID_PLAN),
+            ('open_file_not_found.yml', [plan_path('open_file_not_found.yml')], 1),
         ]:
             with self.subTest(key=key, function='main'):
                 out.truncate(0)

@@ -1,0 +1,8 @@
+Sending 1 requests:
+
+[31m✗ [0m[1mPOST[0m http://localhost:5000/upload                                                         
+  [1mERROR:[0m Failed to resolve templates: File tst/data/photo.jpg not found from
+  tst/data/photo.jpg
+
+[1mRequests:[0m [31m[1m1 failed[0m, 1 total
+[1mElapsed: [0m <DURATION>

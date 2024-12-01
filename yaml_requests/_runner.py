@@ -1,5 +1,6 @@
 from datetime import datetime
 from io import StringIO
+from jinja2.exceptions import TemplateError
 from multiprocessing import cpu_count
 from multiprocessing.pool import ThreadPool
 from requests import request, Session
@@ -10,6 +11,7 @@ from ciou.color import bold
 from ciou.progress import MessageStatus, Update
 from ciou.types import ensure_list
 
+from .error import LoadingPlanDependencyFailedError
 from .utils.template import Environment
 from ._request import Request, parse_request_loop
 
@@ -122,9 +124,13 @@ class PlanRunner:
         self._env = Environment()
         self._prepare_session()
 
-        for name, value in self._env.resolve_templates(
-                self._plan.variables).items():
-            self._env.register(name, value)
+        try:
+            for name, value in self._env.resolve_templates(
+                    self._plan.variables).items():
+                self._env.register(name, value)
+        except TemplateError as e:
+            raise LoadingPlanDependencyFailedError(
+                f'Failed to load plan variables: {str(e)}')
 
         self._logger = logger
 
