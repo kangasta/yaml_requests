@@ -1,4 +1,5 @@
 from copy import deepcopy
+from dataclasses import dataclass
 from os import path
 from pathlib import Path
 
@@ -8,20 +9,32 @@ from .error import (
     InvalidPlanError,
     LoadingPlanDependencyFailedError,
 )
+from ._request import Request
 from .utils.args import load_json_or_yaml_file
 
 
+@dataclass
 class PlanOptions:
-    def __init__(self, plan_dict, options_override=None):
+    '''Options for controlling the execution of the plan.'''
+
+    session: bool = False
+    '''Use session to keep cookies between requests.'''
+    ignore_errors: bool = None
+    '''Continue executing requests even if one of them fails.'''
+    repeat_while: str = None
+    '''Expression that determines if the plan should be repeated.'''
+    repeat_delay: int = None
+    '''Time to sleep in seconds before repeating the plan.'''
+
+    @classmethod
+    def _from_dict(cls, options_dict=None, options_override=None):
+        if options_dict is None:
+            options_dict = {}
+
         if options_override is None:
             options_override = {}
 
-        self._options = {**plan_dict.get('options', {}), **options_override}
-
-        self.session = self._options.get('session', False)
-        self.ignore_errors = self._options.get('ignore_errors')
-        self.repeat_while = self._options.get('repeat_while')
-        self.repeat_delay = self._options.get('repeat_delay')
+        return cls(**{**options_dict, **options_override})
 
 
 def _resolve_variable_files(variable_files, plan_path=None):
@@ -71,33 +84,59 @@ def _load_variable_files(files):
     return variables
 
 
+@dataclass
 class Plan:
-    def __init__(
-            self,
-            plan_dict,
+    '''A plan that contains requests to be executed consecutively.'''
+
+    name: str
+    '''Human readable description for the plan.'''
+    path: str
+    '''Path to the plan file.'''
+    options: PlanOptions
+    '''Options for controlling the execution of the plan. See `PlanOptions`
+    for details.'''
+    variable_files: list[str]
+    '''List of paths to variable files.'''
+    variables: dict
+    '''Variables to be used in the plan.'''
+    requests: list[Request]
+    '''List of requests to be executed.'''
+
+    @classmethod
+    def _from_dict(
+            cls,
+            input_dict,
             options_override=None,
             variables_override=None):
         if variables_override is None:
             variables_override = {}
 
-        self._plan = deepcopy(plan_dict)
+        plan_dict = deepcopy(input_dict)
 
-        self.name = self._plan.pop('name', None)
-        self.path = self._plan.pop('path', None)
-        self.options = PlanOptions(self._plan, options_override)
-        self.variable_files = _resolve_variable_files(
-            self._plan.get('variable_files'), self.path)
-        self.variables = {
-            **self._plan.get('variables', {}),
-            **_load_variable_files(self.variable_files),
+        path = plan_dict.pop('path', None)
+        variable_files = _resolve_variable_files(
+            plan_dict.get('variable_files'), path)
+        variables = {
+            **plan_dict.get('variables', {}),
+            **_load_variable_files(variable_files),
             **variables_override
         }
-        self.requests = self._plan.get('requests')
 
-        if not self.requests or not isinstance(self.requests, list):
+        requests = plan_dict.get('requests')
+        if not requests or not isinstance(requests, list):
             raise AssertionError('Plan must contain requests array.')
 
-    def title(self, display_filename=False):
+        return cls(
+            name=plan_dict.pop('name', None),
+            path=path,
+            options=PlanOptions._from_dict(
+                plan_dict.get('options'), options_override),
+            variable_files=variable_files,
+            variables=variables,
+            requests=requests
+        )
+
+    def _title(self, display_filename=False):
         if not display_filename:
             return self.name
 
@@ -127,7 +166,7 @@ def build_plans(
 
         try:
             plans.append(
-                Plan(
+                Plan._from_dict(
                     plan_dict,
                     variables_override=variables_override))
         except (ValueError, AssertionError,) as error:

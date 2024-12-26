@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Allow defining request method and parameters also by using `method` and `params` fields.
+
 ## [0.16.1]
 
 ### Fixed

@@ -1,6 +1,8 @@
 from copy import deepcopy
+from dataclasses import dataclass
 from jinja2.exceptions import TemplateError
 from requests.exceptions import RequestException
+from typing import Union
 from uuid import uuid4
 
 from .utils.template import Environment
@@ -10,7 +12,10 @@ METHODS = ('GET', 'OPTIONS', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE',)
 EARLIER_ERRORS_SKIP = 'Request skipped due to earlier error.'
 NO_HTTP_METHOD = (
     'Request definition should contain exactly one HTTP method as '
-    'a main level dict key.')
+    'a main level dict key or as main level method and params keys.')
+METHOD_OR_PARAMS_MISSING = (
+    'When using method and params fields to define the request, both method '
+    'and params must be defined.')
 
 
 class RequestState:
@@ -50,22 +55,48 @@ class RequestState:
         return self.state in (self.SUCCESS, self.NOT_RAISED, self.SKIPPED)
 
 
+@dataclass
 class RequestOptions:
-    def __init__(self, request_dict):
-        self.register = request_dict.get('register')
-        self.raise_for_status = request_dict.get('raise_for_status', True)
-        self.output = request_dict.get('output')
+    '''Options for controlling the execution of the request.'''
+
+    register: str = None
+    '''Register the response object as a variable with the given name.'''
+    raise_for_status: bool = True
+    '''Raise an exception if the response status code is not ok.'''
+    output: str = None
+    '''Output the given properties of the response, e.g. `response_json`.'''
+
+    @classmethod
+    def _from_dict(cls, request_dict):
+        return cls(
+            register=request_dict.get('register'),
+            raise_for_status=request_dict.get('raise_for_status', True),
+            output=request_dict.get('output'))
 
 
+@dataclass
 class Assertion:
+    '''An assertion to execute after the request is sent.'''
+
+    name: str
+    '''Human readable description for the assertion.'''
+    expression: str
+    '''Expression to evaluate.'''
+
+
+class ParsedAssertion(Assertion):
     def __init__(self, raw_assertion):
         self._ok = None
         if isinstance(raw_assertion, dict):
-            self.name = raw_assertion.get('name')
-            self.expression = raw_assertion.get('expression')
+            super().__init__(
+                name=raw_assertion.get('name'),
+                expression=raw_assertion.get('expression'),
+            )
         else:
-            self.name = raw_assertion
-            self.expression = raw_assertion
+            super().__init__(
+                name=raw_assertion,
+                expression=raw_assertion,
+            )
 
     @property
     def executed(self):
@@ -74,7 +105,7 @@ class Assertion:
     @property
     def ok(self):
         if self._ok is None:
-            raise RuntimeError('Assertion has not been executed yet.')
+            raise RuntimeError('ParsedAssertion has not been executed yet.')
         return self._ok
 
     def execute(self, template_env, context=None):
@@ -89,7 +120,38 @@ class Assertion:
         return self._ok
 
 
+@dataclass
 class Request:
+    '''A Request to send.'''
+
+    name: str
+    '''Human readable description for the request.'''
+    options: RequestOptions
+    '''Options for controlling the execution of the request. See
+    `RequestOptions` for details.'''
+    method: str
+    '''HTTP method to use.
+
+    Can also be defined as a main level dict key with `params` as the value.
+    For example:
+
+    ```yaml
+    - name: Get index page
+      get:
+        url: http://localhost:8080
+    ```'''
+    params: dict
+    '''Parameters to pass to the `requests.request` function.
+
+    Can also be defined as a main level dict value with the HTTP `method` as
+    the key. See `method` for details.'''
+    loop: str
+    '''Loop over the given list of items.'''
+    assertions: list[Union[Assertion, str]]
+    '''List of assertions to execute after the request is sent.'''
+
+
+class ParsedRequest(Request):
     def __init__(
             self,
             request_dict: dict,
@@ -114,7 +176,7 @@ class Request:
 
         self.name = self._request.pop('name', None)
         self._parse_method_and_params()
-        self.options = RequestOptions(self._request)
+        self.options = RequestOptions._from_dict(self._request)
 
     @property
     def _request(self):
@@ -134,6 +196,23 @@ class Request:
     def _parse_method_and_params(self):
         method_keys = [
             key for key in self._request.keys() if key.upper() in METHODS]
+
+        method = self._request.get('method')
+        params = self._request.get('params')
+        if method and params:
+            self.method = method.upper()
+            self.params = params
+            if len(method_keys) > 0:
+                self._set_state(
+                    RequestState.ERROR,
+                    NO_HTTP_METHOD)
+            return
+        if method or params:
+            self._set_state(
+                RequestState.ERROR,
+                METHOD_OR_PARAMS_MISSING)
+            return
+
         if not method_keys or len(method_keys) > 1:
             self._set_state(
                 RequestState.ERROR,
@@ -149,7 +228,7 @@ class Request:
             raw_assertions = [raw_assertions]
 
         self.assertions = [
-            Assertion(raw_assertion) for raw_assertion in raw_assertions]
+            ParsedAssertion(raw_assertion) for raw_assertion in raw_assertions]
 
     def send(self, request_function):
         if self.state is not None:

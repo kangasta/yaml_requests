@@ -2,7 +2,7 @@ import json
 import os
 
 from yaml_requests.utils.template import Environment
-from yaml_requests._request import Request
+from yaml_requests._request import ParsedRequest
 
 RESPONSE_JSON = dict(message='Mock respose text content')
 SIMPLE_REQUEST = dict(
@@ -48,7 +48,7 @@ class MockResponse:
         return json.loads(self._content)
 
 def get_sent_mock_request(request_dict=None, template_env=None, ok=True, content=None):
-    req = Request(request_dict or SIMPLE_REQUEST, template_env or Environment())
+    req = ParsedRequest(request_dict or SIMPLE_REQUEST, template_env or Environment())
     req.send(MockResponse(ok, content, request_dict))
     return req
 

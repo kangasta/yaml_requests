@@ -301,7 +301,7 @@ yml, yaml]', '? ')
                 self._print()
 
         for plan in plans:
-            self._print(self._style(plan.title(multiple_plans), bold))
+            self._print(self._style(plan._title(multiple_plans), bold))
             self._status(
                 MessageStatus.SKIPPED,
                 'Plan skipped because parsing one or more plans failed.')

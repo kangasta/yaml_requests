@@ -5,6 +5,8 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/c1f5aaa1355b50f202d8/maintainability)](https://codeclimate.com/github/kangasta/yaml_requests/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/c1f5aaa1355b50f202d8/test_coverage)](https://codeclimate.com/github/kangasta/yaml_requests/test_coverage)
 
+<!-- Start docs include -->
+
 A simple python app for sending a set of consecutive HTTP requests defined in YAML requests plan.
 
 ## Installing
@@ -38,6 +40,8 @@ In addition to this basic behavior, more advanced features are provided as well:
 - Response can be verified with assertions.
 - Plan execution can be repeated by setting `repeat_while` option.
 - Request can be looped by defining `loop` option for a request. The current item is available in `item` variable.
+
+<!-- End docs include -->
 
 ## Advanced Example
 

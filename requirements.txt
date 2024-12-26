@@ -8,3 +8,6 @@ pylint
 coverage
 flask
 pylint
+
+# Docs
+pdoc~=15.0
