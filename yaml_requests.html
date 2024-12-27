@@ -85,9 +85,6 @@
                                 <a class="variable" href="#Request.name">name</a>
                         </li>
                         <li>
-                                <a class="variable" href="#Request.options">options</a>
-                        </li>
-                        <li>
                                 <a class="variable" href="#Request.method">method</a>
                         </li>
                         <li>
@@ -99,20 +96,14 @@
                         <li>
                                 <a class="variable" href="#Request.assertions">assertions</a>
                         </li>
-                </ul>
-
-            </li>
-            <li>
-                    <a class="class" href="#RequestOptions">RequestOptions</a>
-                            <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#RequestOptions.register">register</a>
+                                <a class="variable" href="#Request.register">register</a>
                         </li>
                         <li>
-                                <a class="variable" href="#RequestOptions.raise_for_status">raise_for_status</a>
+                                <a class="variable" href="#Request.raise_for_status">raise_for_status</a>
                         </li>
                         <li>
-                                <a class="variable" href="#RequestOptions.output">output</a>
+                                <a class="variable" href="#Request.output">output</a>
                         </li>
                 </ul>
 
@@ -203,11 +194,11 @@ yaml_requests    </h1>
 </span><span id="L-11"><a href="#L-11"><span class="linenos">11</span></a>
 </span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a><span class="kn">from</span> <span class="nn">._main</span> <span class="kn">import</span> <span class="n">execute</span><span class="p">,</span> <span class="n">main</span><span class="p">,</span> <span class="n">run</span>
 </span><span id="L-13"><a href="#L-13"><span class="linenos">13</span></a><span class="kn">from</span> <span class="nn">._plan</span> <span class="kn">import</span> <span class="n">Plan</span><span class="p">,</span> <span class="n">PlanOptions</span>
-</span><span id="L-14"><a href="#L-14"><span class="linenos">14</span></a><span class="kn">from</span> <span class="nn">._request</span> <span class="kn">import</span> <span class="n">Assertion</span><span class="p">,</span> <span class="n">Request</span><span class="p">,</span> <span class="n">RequestOptions</span>
+</span><span id="L-14"><a href="#L-14"><span class="linenos">14</span></a><span class="kn">from</span> <span class="nn">._request</span> <span class="kn">import</span> <span class="n">Assertion</span><span class="p">,</span> <span class="n">Request</span>
 </span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a>
 </span><span id="L-16"><a href="#L-16"><span class="linenos">16</span></a>
 </span><span id="L-17"><a href="#L-17"><span class="linenos">17</span></a><span class="c1"># Hide dataclass constructors from documentation.</span>
-</span><span id="L-18"><a href="#L-18"><span class="linenos">18</span></a><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Plan</span><span class="p">,</span> <span class="n">PlanOptions</span><span class="p">,</span> <span class="n">Assertion</span><span class="p">,</span> <span class="n">Request</span><span class="p">,</span> <span class="n">RequestOptions</span><span class="p">):</span>
+</span><span id="L-18"><a href="#L-18"><span class="linenos">18</span></a><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Plan</span><span class="p">,</span> <span class="n">PlanOptions</span><span class="p">,</span> <span class="n">Assertion</span><span class="p">,</span> <span class="n">Request</span><span class="p">):</span>
 </span><span id="L-19"><a href="#L-19"><span class="linenos">19</span></a>    <span class="n">i</span><span class="o">.</span><span class="fm">__init__</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="s1">&#39;@private&#39;</span>
 </span><span id="L-20"><a href="#L-20"><span class="linenos">20</span></a>
 </span><span id="L-21"><a href="#L-21"><span class="linenos">21</span></a>
@@ -216,9 +207,8 @@ yaml_requests    </h1>
 </span><span id="L-24"><a href="#L-24"><span class="linenos">24</span></a>    <span class="s1">&#39;Plan&#39;</span><span class="p">,</span>
 </span><span id="L-25"><a href="#L-25"><span class="linenos">25</span></a>    <span class="s1">&#39;PlanOptions&#39;</span><span class="p">,</span>
 </span><span id="L-26"><a href="#L-26"><span class="linenos">26</span></a>    <span class="s1">&#39;Request&#39;</span><span class="p">,</span>
-</span><span id="L-27"><a href="#L-27"><span class="linenos">27</span></a>    <span class="s1">&#39;RequestOptions&#39;</span><span class="p">,</span>
-</span><span id="L-28"><a href="#L-28"><span class="linenos">28</span></a>    <span class="s1">&#39;Assertion&#39;</span><span class="p">,</span>
-</span><span id="L-29"><a href="#L-29"><span class="linenos">29</span></a><span class="p">]</span>
+</span><span id="L-27"><a href="#L-27"><span class="linenos">27</span></a>    <span class="s1">&#39;Assertion&#39;</span><span class="p">,</span>
+</span><span id="L-28"><a href="#L-28"><span class="linenos">28</span></a><span class="p">]</span>
 </span></pre></div>
 
 
@@ -492,35 +482,45 @@ for details.</p>
 
     </div>
     <a class="headerlink" href="#Request"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="Request-124"><a href="#Request-124"><span class="linenos">124</span></a><span class="nd">@dataclass</span>
-</span><span id="Request-125"><a href="#Request-125"><span class="linenos">125</span></a><span class="k">class</span> <span class="nc">Request</span><span class="p">:</span>
-</span><span id="Request-126"><a href="#Request-126"><span class="linenos">126</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;A Request to send.&#39;&#39;&#39;</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="Request-116"><a href="#Request-116"><span class="linenos">116</span></a><span class="nd">@dataclass</span>
+</span><span id="Request-117"><a href="#Request-117"><span class="linenos">117</span></a><span class="k">class</span> <span class="nc">Request</span><span class="p">:</span>
+</span><span id="Request-118"><a href="#Request-118"><span class="linenos">118</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;A Request to send.&#39;&#39;&#39;</span>
+</span><span id="Request-119"><a href="#Request-119"><span class="linenos">119</span></a>
+</span><span id="Request-120"><a href="#Request-120"><span class="linenos">120</span></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="Request-121"><a href="#Request-121"><span class="linenos">121</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;Human readable description for the request.&#39;&#39;&#39;</span>
+</span><span id="Request-122"><a href="#Request-122"><span class="linenos">122</span></a>    <span class="n">method</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="Request-123"><a href="#Request-123"><span class="linenos">123</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;HTTP method to use.</span>
+</span><span id="Request-124"><a href="#Request-124"><span class="linenos">124</span></a>
+</span><span id="Request-125"><a href="#Request-125"><span class="linenos">125</span></a><span class="sd">    Can also be defined as a main level dict key with `params` as the value.</span>
+</span><span id="Request-126"><a href="#Request-126"><span class="linenos">126</span></a><span class="sd">    For example:</span>
 </span><span id="Request-127"><a href="#Request-127"><span class="linenos">127</span></a>
-</span><span id="Request-128"><a href="#Request-128"><span class="linenos">128</span></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
-</span><span id="Request-129"><a href="#Request-129"><span class="linenos">129</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;Human readable description for the request.&#39;&#39;&#39;</span>
-</span><span id="Request-130"><a href="#Request-130"><span class="linenos">130</span></a>    <span class="n">options</span><span class="p">:</span> <span class="n">RequestOptions</span>
-</span><span id="Request-131"><a href="#Request-131"><span class="linenos">131</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;Options for controlling the execution of the request. See</span>
-</span><span id="Request-132"><a href="#Request-132"><span class="linenos">132</span></a><span class="sd">    `RequestOptions` for details.&#39;&#39;&#39;</span>
-</span><span id="Request-133"><a href="#Request-133"><span class="linenos">133</span></a>    <span class="n">method</span><span class="p">:</span> <span class="nb">str</span>
-</span><span id="Request-134"><a href="#Request-134"><span class="linenos">134</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;HTTP method to use.</span>
+</span><span id="Request-128"><a href="#Request-128"><span class="linenos">128</span></a><span class="sd">    ```yaml</span>
+</span><span id="Request-129"><a href="#Request-129"><span class="linenos">129</span></a><span class="sd">    - name: Get index page</span>
+</span><span id="Request-130"><a href="#Request-130"><span class="linenos">130</span></a><span class="sd">      get:</span>
+</span><span id="Request-131"><a href="#Request-131"><span class="linenos">131</span></a><span class="sd">        url: http://localhost:8080</span>
+</span><span id="Request-132"><a href="#Request-132"><span class="linenos">132</span></a><span class="sd">    ```&#39;&#39;&#39;</span>
+</span><span id="Request-133"><a href="#Request-133"><span class="linenos">133</span></a>    <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span>
+</span><span id="Request-134"><a href="#Request-134"><span class="linenos">134</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;Parameters to pass to the `requests.request` function.</span>
 </span><span id="Request-135"><a href="#Request-135"><span class="linenos">135</span></a>
-</span><span id="Request-136"><a href="#Request-136"><span class="linenos">136</span></a><span class="sd">    Can also be defined as a main level dict key with `params` as the value.</span>
-</span><span id="Request-137"><a href="#Request-137"><span class="linenos">137</span></a><span class="sd">    For example:</span>
-</span><span id="Request-138"><a href="#Request-138"><span class="linenos">138</span></a>
-</span><span id="Request-139"><a href="#Request-139"><span class="linenos">139</span></a><span class="sd">    ```yaml</span>
-</span><span id="Request-140"><a href="#Request-140"><span class="linenos">140</span></a><span class="sd">    - name: Get index page</span>
-</span><span id="Request-141"><a href="#Request-141"><span class="linenos">141</span></a><span class="sd">      get:</span>
-</span><span id="Request-142"><a href="#Request-142"><span class="linenos">142</span></a><span class="sd">        url: http://localhost:8080</span>
-</span><span id="Request-143"><a href="#Request-143"><span class="linenos">143</span></a><span class="sd">    ```&#39;&#39;&#39;</span>
-</span><span id="Request-144"><a href="#Request-144"><span class="linenos">144</span></a>    <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span>
-</span><span id="Request-145"><a href="#Request-145"><span class="linenos">145</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;Parameters to pass to the `requests.request` function.</span>
-</span><span id="Request-146"><a href="#Request-146"><span class="linenos">146</span></a>
-</span><span id="Request-147"><a href="#Request-147"><span class="linenos">147</span></a><span class="sd">    Can also be defined as a main level dict value with the HTTP `method` as</span>
-</span><span id="Request-148"><a href="#Request-148"><span class="linenos">148</span></a><span class="sd">    the key. See `method` for details.&#39;&#39;&#39;</span>
-</span><span id="Request-149"><a href="#Request-149"><span class="linenos">149</span></a>    <span class="n">loop</span><span class="p">:</span> <span class="nb">str</span>
-</span><span id="Request-150"><a href="#Request-150"><span class="linenos">150</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;Loop over the given list of items.&#39;&#39;&#39;</span>
-</span><span id="Request-151"><a href="#Request-151"><span class="linenos">151</span></a>    <span class="n">assertions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Assertion</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span>
-</span><span id="Request-152"><a href="#Request-152"><span class="linenos">152</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;List of assertions to execute after the request is sent.&#39;&#39;&#39;</span>
+</span><span id="Request-136"><a href="#Request-136"><span class="linenos">136</span></a><span class="sd">    Can also be defined as a main level dict value with the HTTP `method` as</span>
+</span><span id="Request-137"><a href="#Request-137"><span class="linenos">137</span></a><span class="sd">    the key. See `method` for details.&#39;&#39;&#39;</span>
+</span><span id="Request-138"><a href="#Request-138"><span class="linenos">138</span></a>    <span class="n">loop</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="Request-139"><a href="#Request-139"><span class="linenos">139</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;Loop over the given list of items.&#39;&#39;&#39;</span>
+</span><span id="Request-140"><a href="#Request-140"><span class="linenos">140</span></a>    <span class="n">assertions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Assertion</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span>
+</span><span id="Request-141"><a href="#Request-141"><span class="linenos">141</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;List of assertions to execute after the request is sent.</span>
+</span><span id="Request-142"><a href="#Request-142"><span class="linenos">142</span></a>
+</span><span id="Request-143"><a href="#Request-143"><span class="linenos">143</span></a><span class="sd">    Can also be defined with `assert` key.&#39;&#39;&#39;</span>
+</span><span id="Request-144"><a href="#Request-144"><span class="linenos">144</span></a>    <span class="n">register</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="Request-145"><a href="#Request-145"><span class="linenos">145</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;Register the response object as a variable with the given name.&#39;&#39;&#39;</span>
+</span><span id="Request-146"><a href="#Request-146"><span class="linenos">146</span></a>    <span class="n">raise_for_status</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+</span><span id="Request-147"><a href="#Request-147"><span class="linenos">147</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;Raise an exception if the response status code is not ok.&#39;&#39;&#39;</span>
+</span><span id="Request-148"><a href="#Request-148"><span class="linenos">148</span></a>    <span class="n">output</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="Request-149"><a href="#Request-149"><span class="linenos">149</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;Output the given properties of the response, e.g. `response_json`.&#39;&#39;&#39;</span>
+</span><span id="Request-150"><a href="#Request-150"><span class="linenos">150</span></a>
+</span><span id="Request-151"><a href="#Request-151"><span class="linenos">151</span></a>    <span class="k">def</span> <span class="nf">_parse_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request_dict</span><span class="p">):</span>
+</span><span id="Request-152"><a href="#Request-152"><span class="linenos">152</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">register</span> <span class="o">=</span> <span class="n">request_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;register&#39;</span><span class="p">)</span>
+</span><span id="Request-153"><a href="#Request-153"><span class="linenos">153</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">raise_for_status</span> <span class="o">=</span> <span class="n">request_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;raise_for_status&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+</span><span id="Request-154"><a href="#Request-154"><span class="linenos">154</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">output</span> <span class="o">=</span> <span class="n">request_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;output&#39;</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -537,20 +537,6 @@ for details.</p>
     <a class="headerlink" href="#Request.name"></a>
     
             <div class="docstring"><p>Human readable description for the request.</p>
-</div>
-
-
-                            </div>
-                            <div id="Request.options" class="classattr">
-                                <div class="attr variable">
-            <span class="name">options</span><span class="annotation">: <a href="#RequestOptions">RequestOptions</a></span>
-
-        
-    </div>
-    <a class="headerlink" href="#Request.options"></a>
-    
-            <div class="docstring"><p>Options for controlling the execution of the request. See
-<code><a href="#RequestOptions">RequestOptions</a></code> for details.</p>
 </div>
 
 
@@ -616,83 +602,48 @@ the key. See <code><a href="#Request.method">method</a></code> for details.</p>
     <a class="headerlink" href="#Request.assertions"></a>
     
             <div class="docstring"><p>List of assertions to execute after the request is sent.</p>
+
+<p>Can also be defined with <code>assert</code> key.</p>
 </div>
 
 
                             </div>
-                </section>
-                <section id="RequestOptions">
-                            <input id="RequestOptions-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
-<div class="attr class">
-                    <div class="decorator decorator-dataclass">@dataclass</div>
-
-    <span class="def">class</span>
-    <span class="name">RequestOptions</span>:
-
-                <label class="view-source-button" for="RequestOptions-view-source"><span>View Source</span></label>
-
-    </div>
-    <a class="headerlink" href="#RequestOptions"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="RequestOptions-59"><a href="#RequestOptions-59"><span class="linenos">59</span></a><span class="nd">@dataclass</span>
-</span><span id="RequestOptions-60"><a href="#RequestOptions-60"><span class="linenos">60</span></a><span class="k">class</span> <span class="nc">RequestOptions</span><span class="p">:</span>
-</span><span id="RequestOptions-61"><a href="#RequestOptions-61"><span class="linenos">61</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;Options for controlling the execution of the request.&#39;&#39;&#39;</span>
-</span><span id="RequestOptions-62"><a href="#RequestOptions-62"><span class="linenos">62</span></a>
-</span><span id="RequestOptions-63"><a href="#RequestOptions-63"><span class="linenos">63</span></a>    <span class="n">register</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="RequestOptions-64"><a href="#RequestOptions-64"><span class="linenos">64</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;Register the response object as a variable with the given name.&#39;&#39;&#39;</span>
-</span><span id="RequestOptions-65"><a href="#RequestOptions-65"><span class="linenos">65</span></a>    <span class="n">raise_for_status</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-</span><span id="RequestOptions-66"><a href="#RequestOptions-66"><span class="linenos">66</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;Raise an exception if the response status code is not ok.&#39;&#39;&#39;</span>
-</span><span id="RequestOptions-67"><a href="#RequestOptions-67"><span class="linenos">67</span></a>    <span class="n">output</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="RequestOptions-68"><a href="#RequestOptions-68"><span class="linenos">68</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;Output the given properties of the response, e.g. `response_json`.&#39;&#39;&#39;</span>
-</span><span id="RequestOptions-69"><a href="#RequestOptions-69"><span class="linenos">69</span></a>
-</span><span id="RequestOptions-70"><a href="#RequestOptions-70"><span class="linenos">70</span></a>    <span class="nd">@classmethod</span>
-</span><span id="RequestOptions-71"><a href="#RequestOptions-71"><span class="linenos">71</span></a>    <span class="k">def</span> <span class="nf">_from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">request_dict</span><span class="p">):</span>
-</span><span id="RequestOptions-72"><a href="#RequestOptions-72"><span class="linenos">72</span></a>        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
-</span><span id="RequestOptions-73"><a href="#RequestOptions-73"><span class="linenos">73</span></a>            <span class="n">register</span><span class="o">=</span><span class="n">request_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;register&#39;</span><span class="p">),</span>
-</span><span id="RequestOptions-74"><a href="#RequestOptions-74"><span class="linenos">74</span></a>            <span class="n">raise_for_status</span><span class="o">=</span><span class="n">request_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;raise_for_status&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
-</span><span id="RequestOptions-75"><a href="#RequestOptions-75"><span class="linenos">75</span></a>            <span class="n">output</span><span class="o">=</span><span class="n">request_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;output&#39;</span><span class="p">))</span>
-</span></pre></div>
-
-
-            <div class="docstring"><p>Options for controlling the execution of the request.</p>
-</div>
-
-
-                            <div id="RequestOptions.register" class="classattr">
+                            <div id="Request.register" class="classattr">
                                 <div class="attr variable">
             <span class="name">register</span><span class="annotation">: str</span>        =
 <span class="default_value">None</span>
 
         
     </div>
-    <a class="headerlink" href="#RequestOptions.register"></a>
+    <a class="headerlink" href="#Request.register"></a>
     
             <div class="docstring"><p>Register the response object as a variable with the given name.</p>
 </div>
 
 
                             </div>
-                            <div id="RequestOptions.raise_for_status" class="classattr">
+                            <div id="Request.raise_for_status" class="classattr">
                                 <div class="attr variable">
             <span class="name">raise_for_status</span><span class="annotation">: bool</span>        =
 <span class="default_value">True</span>
 
         
     </div>
-    <a class="headerlink" href="#RequestOptions.raise_for_status"></a>
+    <a class="headerlink" href="#Request.raise_for_status"></a>
     
             <div class="docstring"><p>Raise an exception if the response status code is not ok.</p>
 </div>
 
 
                             </div>
-                            <div id="RequestOptions.output" class="classattr">
+                            <div id="Request.output" class="classattr">
                                 <div class="attr variable">
             <span class="name">output</span><span class="annotation">: str</span>        =
 <span class="default_value">None</span>
 
         
     </div>
-    <a class="headerlink" href="#RequestOptions.output"></a>
+    <a class="headerlink" href="#Request.output"></a>
     
             <div class="docstring"><p>Output the given properties of the response, e.g. <code>response_json</code>.</p>
 </div>
@@ -712,18 +663,36 @@ the key. See <code><a href="#Request.method">method</a></code> for details.</p>
 
     </div>
     <a class="headerlink" href="#Assertion"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="Assertion-78"><a href="#Assertion-78"><span class="linenos">78</span></a><span class="nd">@dataclass</span>
-</span><span id="Assertion-79"><a href="#Assertion-79"><span class="linenos">79</span></a><span class="k">class</span> <span class="nc">Assertion</span><span class="p">:</span>
-</span><span id="Assertion-80"><a href="#Assertion-80"><span class="linenos">80</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;An assertion to execute after the request is sent.&#39;&#39;&#39;</span>
-</span><span id="Assertion-81"><a href="#Assertion-81"><span class="linenos">81</span></a>
-</span><span id="Assertion-82"><a href="#Assertion-82"><span class="linenos">82</span></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
-</span><span id="Assertion-83"><a href="#Assertion-83"><span class="linenos">83</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;Human readable description for the assertion.&#39;&#39;&#39;</span>
-</span><span id="Assertion-84"><a href="#Assertion-84"><span class="linenos">84</span></a>    <span class="n">expression</span><span class="p">:</span> <span class="nb">str</span>
-</span><span id="Assertion-85"><a href="#Assertion-85"><span class="linenos">85</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;Expression to evaluate.&#39;&#39;&#39;</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="Assertion-61"><a href="#Assertion-61"><span class="linenos">61</span></a><span class="nd">@dataclass</span>
+</span><span id="Assertion-62"><a href="#Assertion-62"><span class="linenos">62</span></a><span class="k">class</span> <span class="nc">Assertion</span><span class="p">:</span>
+</span><span id="Assertion-63"><a href="#Assertion-63"><span class="linenos">63</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;An assertion to execute after the request is sent. The assertion is</span>
+</span><span id="Assertion-64"><a href="#Assertion-64"><span class="linenos">64</span></a><span class="sd">    considered successful if the expression evaluates to `True`.</span>
+</span><span id="Assertion-65"><a href="#Assertion-65"><span class="linenos">65</span></a>
+</span><span id="Assertion-66"><a href="#Assertion-66"><span class="linenos">66</span></a><span class="sd">    For example:</span>
+</span><span id="Assertion-67"><a href="#Assertion-67"><span class="linenos">67</span></a>
+</span><span id="Assertion-68"><a href="#Assertion-68"><span class="linenos">68</span></a><span class="sd">    ```yaml</span>
+</span><span id="Assertion-69"><a href="#Assertion-69"><span class="linenos">69</span></a><span class="sd">    - name: Response is not empty</span>
+</span><span id="Assertion-70"><a href="#Assertion-70"><span class="linenos">70</span></a><span class="sd">      expression: response.json() | length</span>
+</span><span id="Assertion-71"><a href="#Assertion-71"><span class="linenos">71</span></a><span class="sd">    ```</span>
+</span><span id="Assertion-72"><a href="#Assertion-72"><span class="linenos">72</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="Assertion-73"><a href="#Assertion-73"><span class="linenos">73</span></a>
+</span><span id="Assertion-74"><a href="#Assertion-74"><span class="linenos">74</span></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="Assertion-75"><a href="#Assertion-75"><span class="linenos">75</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;Human readable description for the assertion.&#39;&#39;&#39;</span>
+</span><span id="Assertion-76"><a href="#Assertion-76"><span class="linenos">76</span></a>    <span class="n">expression</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="Assertion-77"><a href="#Assertion-77"><span class="linenos">77</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;Expression to evaluate.&#39;&#39;&#39;</span>
 </span></pre></div>
 
 
-            <div class="docstring"><p>An assertion to execute after the request is sent.</p>
+            <div class="docstring"><p>An assertion to execute after the request is sent. The assertion is
+considered successful if the expression evaluates to <code>True</code>.</p>
+
+<p>For example:</p>
+
+<div class="pdoc-code codehilite">
+<pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Response is not empty</span>
+<span class="w">  </span><span class="nt">expression</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">response.json() | length</span>
+</code></pre>
+</div>
 </div>
 
 
