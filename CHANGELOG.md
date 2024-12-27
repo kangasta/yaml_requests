@@ -7,9 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.16.2]
+
 ### Changed
 
-- Allow defining request method and parameters also by using `method` and `params` fields.
+- Allow defining request method and parameters also by using `method` and `params` keys.
+- Allow defining assertions also with `assertions` key.
 
 ## [0.16.1]
 
@@ -65,7 +68,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for executing multiple plans at once.
 - Support for running plans in parallel.
 
-[unreleased]: https://github.com/kangasta/yaml_requests/compare/v0.16.1...HEAD
+[unreleased]: https://github.com/kangasta/yaml_requests/compare/v0.16.2...HEAD
+[0.16.2]: https://github.com/kangasta/yaml_requests/compare/v0.16.1...v0.16.2
 [0.16.1]: https://github.com/kangasta/yaml_requests/compare/v0.16.0...v0.16.1
 [0.16.0]: https://github.com/kangasta/yaml_requests/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/kangasta/yaml_requests/compare/v0.14.0...v0.15.0
