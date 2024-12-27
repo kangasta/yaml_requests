@@ -43,9 +43,6 @@
                                 <a class="variable" href="#Plan.name">name</a>
                         </li>
                         <li>
-                                <a class="variable" href="#Plan.path">path</a>
-                        </li>
-                        <li>
                                 <a class="variable" href="#Plan.options">options</a>
                         </li>
                         <li>
@@ -232,59 +229,71 @@ yaml_requests    </h1>
 </span><span id="Plan-92"><a href="#Plan-92"><span class="linenos"> 92</span></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
 </span><span id="Plan-93"><a href="#Plan-93"><span class="linenos"> 93</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;Human readable description for the plan.&#39;&#39;&#39;</span>
 </span><span id="Plan-94"><a href="#Plan-94"><span class="linenos"> 94</span></a>    <span class="n">path</span><span class="p">:</span> <span class="nb">str</span>
-</span><span id="Plan-95"><a href="#Plan-95"><span class="linenos"> 95</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;Path to the plan file.&#39;&#39;&#39;</span>
+</span><span id="Plan-95"><a href="#Plan-95"><span class="linenos"> 95</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;@private Path to the plan file.&#39;&#39;&#39;</span>
 </span><span id="Plan-96"><a href="#Plan-96"><span class="linenos"> 96</span></a>    <span class="n">options</span><span class="p">:</span> <span class="n">PlanOptions</span>
 </span><span id="Plan-97"><a href="#Plan-97"><span class="linenos"> 97</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;Options for controlling the execution of the plan. See `PlanOptions`</span>
 </span><span id="Plan-98"><a href="#Plan-98"><span class="linenos"> 98</span></a><span class="sd">    for details.&#39;&#39;&#39;</span>
 </span><span id="Plan-99"><a href="#Plan-99"><span class="linenos"> 99</span></a>    <span class="n">variable_files</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
-</span><span id="Plan-100"><a href="#Plan-100"><span class="linenos">100</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;List of paths to variable files.&#39;&#39;&#39;</span>
-</span><span id="Plan-101"><a href="#Plan-101"><span class="linenos">101</span></a>    <span class="n">variables</span><span class="p">:</span> <span class="nb">dict</span>
-</span><span id="Plan-102"><a href="#Plan-102"><span class="linenos">102</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;Variables to be used in the plan.&#39;&#39;&#39;</span>
-</span><span id="Plan-103"><a href="#Plan-103"><span class="linenos">103</span></a>    <span class="n">requests</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Request</span><span class="p">]</span>
-</span><span id="Plan-104"><a href="#Plan-104"><span class="linenos">104</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;List of requests to be executed.&#39;&#39;&#39;</span>
-</span><span id="Plan-105"><a href="#Plan-105"><span class="linenos">105</span></a>
-</span><span id="Plan-106"><a href="#Plan-106"><span class="linenos">106</span></a>    <span class="nd">@classmethod</span>
-</span><span id="Plan-107"><a href="#Plan-107"><span class="linenos">107</span></a>    <span class="k">def</span> <span class="nf">_from_dict</span><span class="p">(</span>
-</span><span id="Plan-108"><a href="#Plan-108"><span class="linenos">108</span></a>            <span class="bp">cls</span><span class="p">,</span>
-</span><span id="Plan-109"><a href="#Plan-109"><span class="linenos">109</span></a>            <span class="n">input_dict</span><span class="p">,</span>
-</span><span id="Plan-110"><a href="#Plan-110"><span class="linenos">110</span></a>            <span class="n">options_override</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-</span><span id="Plan-111"><a href="#Plan-111"><span class="linenos">111</span></a>            <span class="n">variables_override</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-</span><span id="Plan-112"><a href="#Plan-112"><span class="linenos">112</span></a>        <span class="k">if</span> <span class="n">variables_override</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="Plan-113"><a href="#Plan-113"><span class="linenos">113</span></a>            <span class="n">variables_override</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="Plan-114"><a href="#Plan-114"><span class="linenos">114</span></a>
-</span><span id="Plan-115"><a href="#Plan-115"><span class="linenos">115</span></a>        <span class="n">plan_dict</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">input_dict</span><span class="p">)</span>
-</span><span id="Plan-116"><a href="#Plan-116"><span class="linenos">116</span></a>
-</span><span id="Plan-117"><a href="#Plan-117"><span class="linenos">117</span></a>        <span class="n">path</span> <span class="o">=</span> <span class="n">plan_dict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;path&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-</span><span id="Plan-118"><a href="#Plan-118"><span class="linenos">118</span></a>        <span class="n">variable_files</span> <span class="o">=</span> <span class="n">_resolve_variable_files</span><span class="p">(</span>
-</span><span id="Plan-119"><a href="#Plan-119"><span class="linenos">119</span></a>            <span class="n">plan_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;variable_files&#39;</span><span class="p">),</span> <span class="n">path</span><span class="p">)</span>
-</span><span id="Plan-120"><a href="#Plan-120"><span class="linenos">120</span></a>        <span class="n">variables</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="Plan-121"><a href="#Plan-121"><span class="linenos">121</span></a>            <span class="o">**</span><span class="n">plan_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;variables&#39;</span><span class="p">,</span> <span class="p">{}),</span>
-</span><span id="Plan-122"><a href="#Plan-122"><span class="linenos">122</span></a>            <span class="o">**</span><span class="n">_load_variable_files</span><span class="p">(</span><span class="n">variable_files</span><span class="p">),</span>
-</span><span id="Plan-123"><a href="#Plan-123"><span class="linenos">123</span></a>            <span class="o">**</span><span class="n">variables_override</span>
-</span><span id="Plan-124"><a href="#Plan-124"><span class="linenos">124</span></a>        <span class="p">}</span>
-</span><span id="Plan-125"><a href="#Plan-125"><span class="linenos">125</span></a>
-</span><span id="Plan-126"><a href="#Plan-126"><span class="linenos">126</span></a>        <span class="n">requests</span> <span class="o">=</span> <span class="n">plan_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;requests&#39;</span><span class="p">)</span>
-</span><span id="Plan-127"><a href="#Plan-127"><span class="linenos">127</span></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">requests</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">requests</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-</span><span id="Plan-128"><a href="#Plan-128"><span class="linenos">128</span></a>            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s1">&#39;Plan must contain requests array.&#39;</span><span class="p">)</span>
-</span><span id="Plan-129"><a href="#Plan-129"><span class="linenos">129</span></a>
-</span><span id="Plan-130"><a href="#Plan-130"><span class="linenos">130</span></a>        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
-</span><span id="Plan-131"><a href="#Plan-131"><span class="linenos">131</span></a>            <span class="n">name</span><span class="o">=</span><span class="n">plan_dict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-</span><span id="Plan-132"><a href="#Plan-132"><span class="linenos">132</span></a>            <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span>
-</span><span id="Plan-133"><a href="#Plan-133"><span class="linenos">133</span></a>            <span class="n">options</span><span class="o">=</span><span class="n">PlanOptions</span><span class="o">.</span><span class="n">_from_dict</span><span class="p">(</span>
-</span><span id="Plan-134"><a href="#Plan-134"><span class="linenos">134</span></a>                <span class="n">plan_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;options&#39;</span><span class="p">),</span> <span class="n">options_override</span><span class="p">),</span>
-</span><span id="Plan-135"><a href="#Plan-135"><span class="linenos">135</span></a>            <span class="n">variable_files</span><span class="o">=</span><span class="n">variable_files</span><span class="p">,</span>
-</span><span id="Plan-136"><a href="#Plan-136"><span class="linenos">136</span></a>            <span class="n">variables</span><span class="o">=</span><span class="n">variables</span><span class="p">,</span>
-</span><span id="Plan-137"><a href="#Plan-137"><span class="linenos">137</span></a>            <span class="n">requests</span><span class="o">=</span><span class="n">requests</span>
-</span><span id="Plan-138"><a href="#Plan-138"><span class="linenos">138</span></a>        <span class="p">)</span>
-</span><span id="Plan-139"><a href="#Plan-139"><span class="linenos">139</span></a>
-</span><span id="Plan-140"><a href="#Plan-140"><span class="linenos">140</span></a>    <span class="k">def</span> <span class="nf">_title</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">display_filename</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-</span><span id="Plan-141"><a href="#Plan-141"><span class="linenos">141</span></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">display_filename</span><span class="p">:</span>
-</span><span id="Plan-142"><a href="#Plan-142"><span class="linenos">142</span></a>            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
-</span><span id="Plan-143"><a href="#Plan-143"><span class="linenos">143</span></a>
-</span><span id="Plan-144"><a href="#Plan-144"><span class="linenos">144</span></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
-</span><span id="Plan-145"><a href="#Plan-145"><span class="linenos">145</span></a>            <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s1">)&#39;</span>
-</span><span id="Plan-146"><a href="#Plan-146"><span class="linenos">146</span></a>
-</span><span id="Plan-147"><a href="#Plan-147"><span class="linenos">147</span></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+</span><span id="Plan-100"><a href="#Plan-100"><span class="linenos">100</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;List of paths to variable files. The variable file can be relative to</span>
+</span><span id="Plan-101"><a href="#Plan-101"><span class="linenos">101</span></a><span class="sd">    either the current working directory or the plan file. The variable file</span>
+</span><span id="Plan-102"><a href="#Plan-102"><span class="linenos">102</span></a><span class="sd">    must be a JSON or YAML file.</span>
+</span><span id="Plan-103"><a href="#Plan-103"><span class="linenos">103</span></a>
+</span><span id="Plan-104"><a href="#Plan-104"><span class="linenos">104</span></a><span class="sd">    See `variables` for variable precedence.</span>
+</span><span id="Plan-105"><a href="#Plan-105"><span class="linenos">105</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="Plan-106"><a href="#Plan-106"><span class="linenos">106</span></a>    <span class="n">variables</span><span class="p">:</span> <span class="nb">dict</span>
+</span><span id="Plan-107"><a href="#Plan-107"><span class="linenos">107</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;Variables to be used in the plan.</span>
+</span><span id="Plan-108"><a href="#Plan-108"><span class="linenos">108</span></a>
+</span><span id="Plan-109"><a href="#Plan-109"><span class="linenos">109</span></a><span class="sd">    Variable precedence from least to greatest:</span>
+</span><span id="Plan-110"><a href="#Plan-110"><span class="linenos">110</span></a>
+</span><span id="Plan-111"><a href="#Plan-111"><span class="linenos">111</span></a><span class="sd">    1. Variables defined in the `variables` field of the plan.</span>
+</span><span id="Plan-112"><a href="#Plan-112"><span class="linenos">112</span></a><span class="sd">    2. Variables defined in the variable files.</span>
+</span><span id="Plan-113"><a href="#Plan-113"><span class="linenos">113</span></a><span class="sd">    3. Variables defined in the shell command with `-v`/`--variable` option.</span>
+</span><span id="Plan-114"><a href="#Plan-114"><span class="linenos">114</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="Plan-115"><a href="#Plan-115"><span class="linenos">115</span></a>    <span class="n">requests</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Request</span><span class="p">]</span>
+</span><span id="Plan-116"><a href="#Plan-116"><span class="linenos">116</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;List of requests to be executed.&#39;&#39;&#39;</span>
+</span><span id="Plan-117"><a href="#Plan-117"><span class="linenos">117</span></a>
+</span><span id="Plan-118"><a href="#Plan-118"><span class="linenos">118</span></a>    <span class="nd">@classmethod</span>
+</span><span id="Plan-119"><a href="#Plan-119"><span class="linenos">119</span></a>    <span class="k">def</span> <span class="nf">_from_dict</span><span class="p">(</span>
+</span><span id="Plan-120"><a href="#Plan-120"><span class="linenos">120</span></a>            <span class="bp">cls</span><span class="p">,</span>
+</span><span id="Plan-121"><a href="#Plan-121"><span class="linenos">121</span></a>            <span class="n">input_dict</span><span class="p">,</span>
+</span><span id="Plan-122"><a href="#Plan-122"><span class="linenos">122</span></a>            <span class="n">options_override</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+</span><span id="Plan-123"><a href="#Plan-123"><span class="linenos">123</span></a>            <span class="n">variables_override</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+</span><span id="Plan-124"><a href="#Plan-124"><span class="linenos">124</span></a>        <span class="k">if</span> <span class="n">variables_override</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="Plan-125"><a href="#Plan-125"><span class="linenos">125</span></a>            <span class="n">variables_override</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="Plan-126"><a href="#Plan-126"><span class="linenos">126</span></a>
+</span><span id="Plan-127"><a href="#Plan-127"><span class="linenos">127</span></a>        <span class="n">plan_dict</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">input_dict</span><span class="p">)</span>
+</span><span id="Plan-128"><a href="#Plan-128"><span class="linenos">128</span></a>
+</span><span id="Plan-129"><a href="#Plan-129"><span class="linenos">129</span></a>        <span class="n">path</span> <span class="o">=</span> <span class="n">plan_dict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;path&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+</span><span id="Plan-130"><a href="#Plan-130"><span class="linenos">130</span></a>        <span class="n">variable_files</span> <span class="o">=</span> <span class="n">_resolve_variable_files</span><span class="p">(</span>
+</span><span id="Plan-131"><a href="#Plan-131"><span class="linenos">131</span></a>            <span class="n">plan_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;variable_files&#39;</span><span class="p">),</span> <span class="n">path</span><span class="p">)</span>
+</span><span id="Plan-132"><a href="#Plan-132"><span class="linenos">132</span></a>        <span class="n">variables</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="Plan-133"><a href="#Plan-133"><span class="linenos">133</span></a>            <span class="o">**</span><span class="n">plan_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;variables&#39;</span><span class="p">,</span> <span class="p">{}),</span>
+</span><span id="Plan-134"><a href="#Plan-134"><span class="linenos">134</span></a>            <span class="o">**</span><span class="n">_load_variable_files</span><span class="p">(</span><span class="n">variable_files</span><span class="p">),</span>
+</span><span id="Plan-135"><a href="#Plan-135"><span class="linenos">135</span></a>            <span class="o">**</span><span class="n">variables_override</span>
+</span><span id="Plan-136"><a href="#Plan-136"><span class="linenos">136</span></a>        <span class="p">}</span>
+</span><span id="Plan-137"><a href="#Plan-137"><span class="linenos">137</span></a>
+</span><span id="Plan-138"><a href="#Plan-138"><span class="linenos">138</span></a>        <span class="n">requests</span> <span class="o">=</span> <span class="n">plan_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;requests&#39;</span><span class="p">)</span>
+</span><span id="Plan-139"><a href="#Plan-139"><span class="linenos">139</span></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">requests</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">requests</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+</span><span id="Plan-140"><a href="#Plan-140"><span class="linenos">140</span></a>            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s1">&#39;Plan must contain requests array.&#39;</span><span class="p">)</span>
+</span><span id="Plan-141"><a href="#Plan-141"><span class="linenos">141</span></a>
+</span><span id="Plan-142"><a href="#Plan-142"><span class="linenos">142</span></a>        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+</span><span id="Plan-143"><a href="#Plan-143"><span class="linenos">143</span></a>            <span class="n">name</span><span class="o">=</span><span class="n">plan_dict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+</span><span id="Plan-144"><a href="#Plan-144"><span class="linenos">144</span></a>            <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span>
+</span><span id="Plan-145"><a href="#Plan-145"><span class="linenos">145</span></a>            <span class="n">options</span><span class="o">=</span><span class="n">PlanOptions</span><span class="o">.</span><span class="n">_from_dict</span><span class="p">(</span>
+</span><span id="Plan-146"><a href="#Plan-146"><span class="linenos">146</span></a>                <span class="n">plan_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;options&#39;</span><span class="p">),</span> <span class="n">options_override</span><span class="p">),</span>
+</span><span id="Plan-147"><a href="#Plan-147"><span class="linenos">147</span></a>            <span class="n">variable_files</span><span class="o">=</span><span class="n">variable_files</span><span class="p">,</span>
+</span><span id="Plan-148"><a href="#Plan-148"><span class="linenos">148</span></a>            <span class="n">variables</span><span class="o">=</span><span class="n">variables</span><span class="p">,</span>
+</span><span id="Plan-149"><a href="#Plan-149"><span class="linenos">149</span></a>            <span class="n">requests</span><span class="o">=</span><span class="n">requests</span>
+</span><span id="Plan-150"><a href="#Plan-150"><span class="linenos">150</span></a>        <span class="p">)</span>
+</span><span id="Plan-151"><a href="#Plan-151"><span class="linenos">151</span></a>
+</span><span id="Plan-152"><a href="#Plan-152"><span class="linenos">152</span></a>    <span class="k">def</span> <span class="nf">_title</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">display_filename</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+</span><span id="Plan-153"><a href="#Plan-153"><span class="linenos">153</span></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">display_filename</span><span class="p">:</span>
+</span><span id="Plan-154"><a href="#Plan-154"><span class="linenos">154</span></a>            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+</span><span id="Plan-155"><a href="#Plan-155"><span class="linenos">155</span></a>
+</span><span id="Plan-156"><a href="#Plan-156"><span class="linenos">156</span></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
+</span><span id="Plan-157"><a href="#Plan-157"><span class="linenos">157</span></a>            <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s1">)&#39;</span>
+</span><span id="Plan-158"><a href="#Plan-158"><span class="linenos">158</span></a>
+</span><span id="Plan-159"><a href="#Plan-159"><span class="linenos">159</span></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
 </span></pre></div>
 
 
@@ -301,19 +310,6 @@ yaml_requests    </h1>
     <a class="headerlink" href="#Plan.name"></a>
     
             <div class="docstring"><p>Human readable description for the plan.</p>
-</div>
-
-
-                            </div>
-                            <div id="Plan.path" class="classattr">
-                                <div class="attr variable">
-            <span class="name">path</span><span class="annotation">: str</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Plan.path"></a>
-    
-            <div class="docstring"><p>Path to the plan file.</p>
 </div>
 
 
@@ -340,7 +336,11 @@ for details.</p>
     </div>
     <a class="headerlink" href="#Plan.variable_files"></a>
     
-            <div class="docstring"><p>List of paths to variable files.</p>
+            <div class="docstring"><p>List of paths to variable files. The variable file can be relative to
+either the current working directory or the plan file. The variable file
+must be a JSON or YAML file.</p>
+
+<p>See <code><a href="#Plan.variables">variables</a></code> for variable precedence.</p>
 </div>
 
 
@@ -354,6 +354,14 @@ for details.</p>
     <a class="headerlink" href="#Plan.variables"></a>
     
             <div class="docstring"><p>Variables to be used in the plan.</p>
+
+<p>Variable precedence from least to greatest:</p>
+
+<ol>
+<li>Variables defined in the <code><a href="#Plan.variables">variables</a></code> field of the plan.</li>
+<li>Variables defined in the variable files.</li>
+<li>Variables defined in the shell command with <code>-v</code>/<code>--variable</code> option.</li>
+</ol>
 </div>
 
 
