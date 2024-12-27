@@ -31,6 +31,7 @@ yaml_requests = "yaml_requests:execute"
 Homepage = "https://github.com/kangasta/yaml_requests"
 Repository = "https://github.com/kangasta/yaml_requests.git"
 Changelog = "https://github.com/kangasta/yaml_requests/blob/main/CHANGELOG.md"
+Documentation = "https://kangasta.github.io/yaml_requests/"
 
 [tool.setuptools.packages.find]
 include = ["yaml_requests*"]
