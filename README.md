@@ -43,6 +43,8 @@ In addition to this basic behavior, more advanced features are provided as well:
 
 <!-- End docs include -->
 
+See documentation for [API reference](https://kangasta.github.io/yaml_requests/yaml_requests.html#api-reference).
+
 ## Advanced Example
 
 Here is an advanced example:
