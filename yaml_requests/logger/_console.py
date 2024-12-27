@@ -244,7 +244,7 @@ yml, yaml]', '? ')
             return ''
 
     def _response_text(self, request):
-        output = request.options.output
+        output = request.output
         output = output if isinstance(output, list) else [output]
 
         return ''.join(self._response_output_text(request, i) for i in output)

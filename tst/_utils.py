@@ -15,7 +15,7 @@ SIMPLE_REQUEST = dict(
 )
 REQUEST_WITH_ASSERT = {
     'get': dict(url='http://localhost:5000'),
-    'assert': 'var == 3'
+    'assertions': 'var == 3'
 }
 TST_DIR = os.path.dirname(os.path.realpath(__file__))
 

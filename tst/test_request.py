@@ -142,6 +142,17 @@ class RequestTest(TestCase):
         req.send(MockResponse(True))
         self.assertEqual(req.state, RequestState.ERROR)
 
+    def test_assertions_from_assert(self):
+        env = Environment()
+
+        req_dict = deepcopy(REQUEST_WITH_ASSERT)
+        assertions = req_dict.pop('assertions')
+        req_dict['assert'] = assertions
+
+        req = ParsedRequest(req_dict, env)
+        self.assertIsInstance(req.assertions, list)
+        self.assertEqual(len(req.assertions), 1)
+
     def test_failed_assertion_set_failure_state(self):
         env = Environment()
         env.register('var', 5)

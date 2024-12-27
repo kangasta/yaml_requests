@@ -11,11 +11,11 @@ __version__ = version('yaml_requests')
 
 from ._main import execute, main, run
 from ._plan import Plan, PlanOptions
-from ._request import Assertion, Request, RequestOptions
+from ._request import Assertion, Request
 
 
 # Hide dataclass constructors from documentation.
-for i in (Plan, PlanOptions, Assertion, Request, RequestOptions):
+for i in (Plan, PlanOptions, Assertion, Request):
     i.__init__.__doc__ = '@private'
 
 
@@ -24,6 +24,5 @@ __all__ = [
     'Plan',
     'PlanOptions',
     'Request',
-    'RequestOptions',
     'Assertion',
 ]
