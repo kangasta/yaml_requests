@@ -5,6 +5,8 @@ from requests.exceptions import RequestException
 from typing import Union
 from uuid import uuid4
 
+from ciou.types import ensure_list
+
 from .utils.template import Environment
 
 
@@ -56,27 +58,17 @@ class RequestState:
 
 
 @dataclass
-class RequestOptions:
-    '''Options for controlling the execution of the request.'''
-
-    register: str = None
-    '''Register the response object as a variable with the given name.'''
-    raise_for_status: bool = True
-    '''Raise an exception if the response status code is not ok.'''
-    output: str = None
-    '''Output the given properties of the response, e.g. `response_json`.'''
-
-    @classmethod
-    def _from_dict(cls, request_dict):
-        return cls(
-            register=request_dict.get('register'),
-            raise_for_status=request_dict.get('raise_for_status', True),
-            output=request_dict.get('output'))
-
-
-@dataclass
 class Assertion:
-    '''An assertion to execute after the request is sent.'''
+    '''An assertion to execute after the request is sent. The assertion is
+    considered successful if the expression evaluates to `True`.
+
+    For example:
+
+    ```yaml
+    - name: Response is not empty
+      expression: response.json() | length
+    ```
+    '''
 
     name: str
     '''Human readable description for the assertion.'''
@@ -126,9 +118,6 @@ class Request:
 
     name: str
     '''Human readable description for the request.'''
-    options: RequestOptions
-    '''Options for controlling the execution of the request. See
-    `RequestOptions` for details.'''
     method: str
     '''HTTP method to use.
 
@@ -148,7 +137,20 @@ class Request:
     loop: str
     '''Loop over the given list of items.'''
     assertions: list[Union[Assertion, str]]
-    '''List of assertions to execute after the request is sent.'''
+    '''List of assertions to execute after the request is sent.
+
+    Can also be defined with `assert` key.'''
+    register: str = None
+    '''Register the response object as a variable with the given name.'''
+    raise_for_status: bool = True
+    '''Raise an exception if the response status code is not ok.'''
+    output: str = None
+    '''Output the given properties of the response, e.g. `response_json`.'''
+
+    def _parse_options(self, request_dict):
+        self.register = request_dict.get('register')
+        self.raise_for_status = request_dict.get('raise_for_status', True)
+        self.output = request_dict.get('output')
 
 
 class ParsedRequest(Request):
@@ -176,7 +178,7 @@ class ParsedRequest(Request):
 
         self.name = self._request.pop('name', None)
         self._parse_method_and_params()
-        self.options = RequestOptions._from_dict(self._request)
+        self._parse_options(self._request)
 
     @property
     def _request(self):
@@ -223,10 +225,11 @@ class ParsedRequest(Request):
         self.params = self._request.pop(method_keys[0])
 
     def _parse_assertions(self):
-        raw_assertions = self._request.pop('assert', [])
-        if not isinstance(raw_assertions, list):
-            raw_assertions = [raw_assertions]
+        raw_assertions = self._request.pop('assertions', [])
+        if not raw_assertions:
+            raw_assertions = self._request.pop('assert', [])
 
+        raw_assertions = ensure_list(raw_assertions)
         self.assertions = [
             ParsedAssertion(raw_assertion) for raw_assertion in raw_assertions]
 
@@ -241,11 +244,11 @@ class ParsedRequest(Request):
             return
 
         self._template_env.register('response', self.response)
-        if self.options.register:
-            self._template_env.register(self.options.register, self.response)
+        if self.register:
+            self._template_env.register(self.register, self.response)
 
         if not self.response.ok:
-            if self.options.raise_for_status:
+            if self.raise_for_status:
                 self._set_state(RequestState.FAILURE)
             else:
                 self._set_state(RequestState.NOT_RAISED)
