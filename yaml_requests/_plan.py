@@ -91,14 +91,26 @@ class Plan:
     name: str
     '''Human readable description for the plan.'''
     path: str
-    '''Path to the plan file.'''
+    '''@private Path to the plan file.'''
     options: PlanOptions
     '''Options for controlling the execution of the plan. See `PlanOptions`
     for details.'''
     variable_files: list[str]
-    '''List of paths to variable files.'''
+    '''List of paths to variable files. The variable file can be relative to
+    either the current working directory or the plan file. The variable file
+    must be a JSON or YAML file.
+
+    See `variables` for variable precedence.
+    '''
     variables: dict
-    '''Variables to be used in the plan.'''
+    '''Variables to be used in the plan.
+
+    Variable precedence from least to greatest:
+
+    1. Variables defined in the `variables` field of the plan.
+    2. Variables defined in the variable files.
+    3. Variables defined in the shell command with `-v`/`--variable` option.
+    '''
     requests: list[Request]
     '''List of requests to be executed.'''
 
