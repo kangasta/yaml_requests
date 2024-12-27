@@ -8,7 +8,7 @@ from requests import RequestException
 
 from yaml_requests.utils.template import Environment
 from yaml_requests.logger import ConsoleLogger, RequestLogger
-from yaml_requests._request import Request
+from yaml_requests._request import ParsedRequest
 
 from _utils import get_sent_mock_request, SIMPLE_REQUEST, RESPONSE_JSON, REQUEST_WITH_ASSERT
 
@@ -83,7 +83,7 @@ class ConsoleLoggerTest(TestCase):
         logger = ConsoleLogger(False, False)
         logger.start()
 
-        request = Request(REQUEST_WITH_ASSERT, Environment())
+        request = ParsedRequest(REQUEST_WITH_ASSERT, Environment())
         request_mock = MagicMock(side_effect=RequestException)
 
         request.send(request_mock)
@@ -94,7 +94,7 @@ class ConsoleLoggerTest(TestCase):
 class RequestLoggerTest(TestCase):
     def test_log_errored_request_with_asserts(self):
         logger = RequestLogger()
-        request = Request(REQUEST_WITH_ASSERT, Environment())
+        request = ParsedRequest(REQUEST_WITH_ASSERT, Environment())
 
         logger.start_request(request)
         self.assertIsNone(logger.requests[0].state)

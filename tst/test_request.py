@@ -1,9 +1,10 @@
+from copy import deepcopy
 from unittest import TestCase
 
 from jinja2.exceptions import TemplateError
 
 from yaml_requests.utils.template import Environment
-from yaml_requests._request import Assertion, Request, RequestState, parse_request_loop
+from yaml_requests._request import ParsedAssertion, ParsedRequest, RequestState, parse_request_loop
 
 from _utils import MockResponse, REQUEST_WITH_ASSERT
 
@@ -21,14 +22,14 @@ class RequestStateTest(TestCase):
 
 class AssertionTest(TestCase):
     def test_ok_raises_if_not_executed(self):
-        assertion = Assertion('var is undefined')
+        assertion = ParsedAssertion('var is undefined')
         self.assertEqual(assertion.name, 'var is undefined')
         with self.assertRaises(RuntimeError):
             assertion.ok
 
     def test_execute_raises_on_error(self):
         env = Environment()
-        assertion = Assertion('var == 3')
+        assertion = ParsedAssertion('var == 3')
         with self.assertRaises(TemplateError):
             assertion.execute(env)
         self.assertFalse(assertion.ok)
@@ -36,6 +37,12 @@ class AssertionTest(TestCase):
 REQUEST_WITH_VARIABLE = dict(
     name='Get {{ url }}',
     get=dict(url='{{ url }}')
+)
+
+REQUEST_WITH_METHOD_AND_PARAMS = dict(
+    name='With method and params',
+    method='get',
+    params=dict(url='{{ url }}')
 )
 
 REQUEST_WITH_LOOP = dict(
@@ -53,26 +60,47 @@ class RequestTest(TestCase):
     def test_init_sets_error_when_template_processing_fails(self):
         env = Environment()
 
-        req = Request(REQUEST_WITH_VARIABLE, env)
+        req = ParsedRequest(REQUEST_WITH_VARIABLE, env)
         self.assertEqual(req.state, RequestState.ERROR)
 
-        req = Request(REQUEST_WITH_VARIABLE, env, context=dict(url='http://localhost:5000'))
+        req = ParsedRequest(REQUEST_WITH_VARIABLE, env, context=dict(url='http://localhost:5000'))
         self.assertIsNone(req.state)
 
         env.register('url','http://localhost:5000')
-        req = Request(REQUEST_WITH_VARIABLE, env)
+        req = ParsedRequest(REQUEST_WITH_VARIABLE, env)
         self.assertIsNone(req.state)
+
+    def test_init_parses_method_and_params(self):
+        env = Environment()
+        env.register('url','http://localhost:5000')
+
+        req = ParsedRequest(REQUEST_WITH_METHOD_AND_PARAMS, env)
+        self.assertIsNone(req.state)
+        self.assertEqual(req.method, 'GET')
+        self.assertEqual(req.params['url'], 'http://localhost:5000')
+
+        request_dict = deepcopy(REQUEST_WITH_METHOD_AND_PARAMS)
+        request_dict.pop('method')
+        req = ParsedRequest(REQUEST_WITOUT_METHOD, env)
+        self.assertEqual(req.state, RequestState.ERROR)
 
     def test_init_sets_error_when_no_http_method(self):
         env = Environment()
 
-        req = Request(REQUEST_WITOUT_METHOD, env)
+        req = ParsedRequest(REQUEST_WITOUT_METHOD, env)
+        self.assertEqual(req.state, RequestState.ERROR)
+
+    def test_init_sets_error_when_multiple_http_methods(self):
+        env = Environment()
+        env.register('url','http://localhost:5000')
+
+        req = ParsedRequest({**REQUEST_WITH_METHOD_AND_PARAMS, **REQUEST_WITH_VARIABLE}, env)
         self.assertEqual(req.state, RequestState.ERROR)
 
     def test_send_invalid_does_not_raise(self):
         env = Environment()
 
-        req = Request(REQUEST_WITOUT_METHOD, env)
+        req = ParsedRequest(REQUEST_WITOUT_METHOD, env)
         self.assertEqual(req.state, RequestState.ERROR)
 
         req.send(lambda: None)
@@ -97,7 +125,7 @@ class RequestTest(TestCase):
             else:
                 request_dict = REQUEST_WITH_VARIABLE
 
-            req = Request(request_dict, env)
+            req = ParsedRequest(request_dict, env)
             req.send(MockResponse(response_ok))
             self.assertEqual(
                 req.state,
@@ -107,7 +135,7 @@ class RequestTest(TestCase):
     def test_assertions_from_str(self):
         env = Environment()
 
-        req = Request(REQUEST_WITH_ASSERT, env)
+        req = ParsedRequest(REQUEST_WITH_ASSERT, env)
         self.assertIsInstance(req.assertions, list)
         self.assertEqual(len(req.assertions), 1)
 
@@ -118,7 +146,7 @@ class RequestTest(TestCase):
         env = Environment()
         env.register('var', 5)
 
-        req = Request(REQUEST_WITH_ASSERT, env)
+        req = ParsedRequest(REQUEST_WITH_ASSERT, env)
         req.send(MockResponse(True))
         self.assertEqual(req.state, RequestState.FAILURE)
 
@@ -129,5 +157,5 @@ class RequestTest(TestCase):
 
         for i, args in enumerate(args_loop):
             request_dict, template_env, context = args
-            req = Request(request_dict, template_env, False, context)
+            req = ParsedRequest(request_dict, template_env, False, context)
             self.assertEqual(req.params['url'], f'http://localhost:5000/items/{i+1}')

@@ -1,0 +1,26 @@
+name: Docs
+on:
+  push:
+    branches:
+    - main
+
+jobs:
+  generate-docs:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: "3.10"
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+    - name: Generate documentation
+      run: |
+        pdoc -d google -o docs ./yaml_requests
+    - name: Deploy to pages
+      uses: JamesIves/github-pages-deploy-action@3.7.1
+      with:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        BRANCH: gh-pages
+        FOLDER: docs/
+        CLEAN: true

@@ -12,13 +12,13 @@ class PlanTest(TestCase):
     def test_parse_invalid_plan(self):
         plan_dict = load_plan_file(plan_path('invalid_plan.yml'))
         with self.assertRaises(AssertionError):
-            Plan(plan_dict)
+            Plan._from_dict(plan_dict)
 
     def test_parse_valid_plan(self):
         for plan_file in ['minimal_plan.yml', 'full_plan.yml']:
             with self.subTest(plan=plan_file):
                 plan_dict = load_plan_file(plan_path(plan_file))
-                Plan(plan_dict)
+                Plan._from_dict(plan_dict)
 
     def test_parse_plan_overrides(self):
         options_override = dict(session=False)
@@ -27,7 +27,7 @@ class PlanTest(TestCase):
         for plan_file in ['minimal_plan.yml', 'full_plan.yml']:
             with self.subTest(plan=plan_file):
                 plan_dict = load_plan_file(plan_path(plan_file))
-                plan = Plan(
+                plan = Plan._from_dict(
                     plan_dict,
                     options_override=options_override,
                     variables_override=variables_override)
@@ -37,7 +37,7 @@ class PlanTest(TestCase):
 
     def test_parse_session_options(self):
         plan_dict = load_plan_file(plan_path('integration/use_session_defaults.yml'))
-        plan = Plan(plan_dict)
+        plan = Plan._from_dict(plan_dict)
         runner = PlanRunner(plan, ConsoleLogger(False, False))
         session = runner._session
 

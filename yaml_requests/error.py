@@ -1,7 +1,11 @@
 NO_PLAN = 251
+'''Exit code for `NoPlanError`.'''
 INVALID_PLAN = 252
+'''Exit code for `InvalidPlanError`.'''
 INTERRUPTED = 253
+'''Exit code for `InterruptedError`.'''
 UNKNOWN_ERROR = 254
+'''Exit code for unknown errors.'''
 
 
 UNKNOWN_ERROR_MSG = (
@@ -12,12 +16,17 @@ UNKNOWN_ERROR_MSG = (
 
 
 class YamlRequestsError(Exception):
+    '''Base class for `yaml_requests` errors.'''
+
     def __init__(self, message, exit_code):
         super().__init__(message)
         self.exit_code = exit_code
+        '''Exit code for the error.'''
 
 
 class NoPlanError(YamlRequestsError):
+    '''No plan file was provided or provided file was not found.'''
+
     def __init__(self, path=None):
         if not path:
             super().__init__('No requests plan file provided.', NO_PLAN)
@@ -27,15 +36,22 @@ class NoPlanError(YamlRequestsError):
 
 
 class InvalidPlanError(YamlRequestsError):
+    '''Parsing the plan file failed.'''
+
     def __init__(self, message):
         super().__init__(message, INVALID_PLAN)
 
 
 class LoadingPlanDependencyFailedError(InvalidPlanError):
+    '''Failed to load a plan dependency. For example, parsing a variable file
+    failed.'''
+
     def __init__(self, message):
         super().__init__(message)
 
 
 class InterruptedError(YamlRequestsError):
+    '''The execution was interrupted by the user.'''
+
     def __init__(self):
         super().__init__('', INTERRUPTED)

@@ -13,7 +13,7 @@ from ciou.types import ensure_list
 
 from .error import LoadingPlanDependencyFailedError
 from .utils.template import Environment
-from ._request import Request, parse_request_loop
+from ._request import ParsedRequest, parse_request_loop
 
 
 PASS = 0
@@ -167,7 +167,7 @@ class PlanRunner:
 
     @property
     def title(self):
-        return self._plan.title(self._display_filename)
+        return self._plan._title(self._display_filename)
 
     def run(self):
         n = ListCounter(3)
@@ -196,7 +196,7 @@ class PlanRunner:
                 for args in args_loop:
                     request_dict, template_env, context = args
                     skip = not ignore_errors and n[FAIL] > 0
-                    request = Request(
+                    request = ParsedRequest(
                         request_dict, template_env, skip, context)
 
                     if request.state is None:
